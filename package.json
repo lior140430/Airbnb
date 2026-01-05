@@ -1,0 +1,16 @@
+{
+  "name": "airbnb-monorepo",
+  "version": "1.0.0",
+  "description": "Airbnb clone - monorepo with NestJS services and React client",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
