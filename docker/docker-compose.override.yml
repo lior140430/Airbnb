@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  auth-service:
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+
+  property-service:
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+
+  client:
+    environment:
+      - VITE_API_URL=http://localhost:3000
