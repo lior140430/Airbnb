@@ -1,0 +1,22 @@
+{
+  "name": "property-service",
+  "version": "1.0.0",
+  "description": "Property management service",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main"
+  },
+  "dependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/mongoose": "^10.0.0",
+    "@nestjs/websockets": "^10.0.0",
+    "@nestjs/platform-socket.io": "^10.0.0",
+    "socket.io": "^4.5.0",
+    "class-validator": "^0.14.0",
+    "mongoose": "^7.0.0"
+  }
+}
