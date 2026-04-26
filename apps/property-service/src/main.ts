@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { join } from 'path';
 import { AppModule } from './app.module';
@@ -18,6 +19,18 @@ async function bootstrap() {
     app.useStaticAssets(join(__dirname, '..', 'uploads'), {
         prefix: '/uploads',
     });
+
+    const swaggerConfig = new DocumentBuilder()
+        .setTitle('Property Service API')
+        .setDescription('Property listings, chat, AI search and real-time messaging endpoints')
+        .setVersion('1.0')
+        .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+        .addTag('properties', 'Property listing endpoints')
+        .addTag('chat', 'Chat and messaging endpoints')
+        .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('api/docs', app, document);
+
     await app.listen(process.env.PORT ?? 3001);
 }
 bootstrap();
