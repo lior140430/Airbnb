@@ -1,0 +1,36 @@
+:root {
+  /* Brand Colors */
+  --brand-rose: #FF385C;
+  --brand-rose-hover: #E31C5F;
+  --brand-joy: #FFB400;
+  --bg-light: #F7F7F7;
+
+  /* Text Colors */
+  --text-main: #222222;
+  --text-muted: #717171;
+  --text-inverse: #FFFFFF;
+
+  /* Borders & Shadows */
+  --border-radius-main: 12px;
+  --border-radius-pill: 24px;
+  --border-color: #DDDDDD;
+  --shadow-main: 0 6px 16px rgba(0, 0, 0, 0.12);
+  --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.2);
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+  --spacing-xl: 3rem;
+
+  font-family: 'Assistant', sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: 'Assistant', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #ffffff;
+  color: var(--text-main);
+}

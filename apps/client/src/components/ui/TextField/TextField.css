@@ -1,0 +1,39 @@
+.text-field-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.text-field-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted, #717171);
+}
+
+.text-field-input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #b0b0b0;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: var(--text-main, #222222);
+    background-color: white;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.text-field-input:focus {
+    border-color: #222222;
+    border-width: 2px;
+    padding: calc(1rem - 1px);
+    /* Prevent layout shift */
+}
+
+.text-field-error {
+    font-size: 0.75rem;
+    color: #c13515;
+    margin-top: 4px;
+}

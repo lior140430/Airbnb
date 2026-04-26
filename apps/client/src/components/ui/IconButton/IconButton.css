@@ -1,0 +1,72 @@
+.icon-btn {
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    line-height: 0;
+    flex-shrink: 0;
+}
+
+.icon-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.icon-btn.variant-outline {
+    border: 1px solid #b0b0b0;
+    background: white;
+    border-radius: 8px;
+    /* Changed to rounded rect */
+    max-width: 100%;
+}
+
+.icon-btn.variant-outline:hover {
+    border-color: black;
+    background-color: #f7f7f7;
+}
+
+.icon-btn.variant-ghost {
+    border: none;
+    background: transparent;
+    border-radius: 50%;
+}
+
+/* Size variants */
+.icon-btn.size-small {
+    width: 32px;
+    height: 32px;
+}
+
+.icon-btn.size-medium {
+    width: 40px;
+    height: 40px;
+}
+
+.icon-btn.size-large {
+    width: 48px;
+    /* Ensure standard height for icons */
+    height: 48px;
+}
+
+/* Specific override for social buttons (outline variant) */
+.icon-btn.variant-outline.size-large {
+    border-radius: 8px;
+    /* Ensure 8px for large buttons */
+}
+
+.icon-btn.size-large {
+    width: 48px;
+    height: 48px;
+}
