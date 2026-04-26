@@ -1,11 +1,11 @@
-import { Body, Controller, Get, Patch, Post, Req, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Response, Request } from 'express';
-import { diskStorage } from 'multer';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 import { existsSync, mkdirSync } from 'fs';
-import { extname, join } from 'path';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { LogInDto } from './dto/log-in.dto';
@@ -38,6 +38,7 @@ const avatarMulterOptions = {
     limits: { fileSize: 5 * 1024 * 1024 },
 };
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
     constructor(
@@ -47,17 +48,24 @@ export class AuthController {
         private readonly configService: ConfigService,
     ) { }
 
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Update current user profile' })
+    @ApiResponse({ status: 200, description: 'Profile updated successfully.' })
     @UseGuards(AuthGuard('jwt'))
     @Patch('profile')
     async updateProfile(@Req() req, @Body() updateData: UpdateProfileDto) {
         return this.userService.update(req.user.sub, updateData);
     }
 
+    @ApiOperation({ summary: 'Check if email exists and which providers are linked' })
+    @ApiResponse({ status: 200, description: 'Returns email existence and provider flags.' })
     @Post('check-email')
     async checkEmail(@Body('email') email: string) {
         return this.authService.checkEmail(email);
     }
 
+    @ApiOperation({ summary: 'Register a new user' })
+    @ApiResponse({ status: 201, description: 'User created, returns accessToken and user object.' })
     @Post('signup')
     async signUp(@Body() signUpDto: SignUpDto, @Res({ passthrough: true }) response: Response) {
         const result = await this.authService.signUp(signUpDto);
@@ -74,6 +82,9 @@ export class AuthController {
         return { accessToken: tokens.accessToken, user: result.user };
     }
 
+    @ApiOperation({ summary: 'Login with email and password' })
+    @ApiResponse({ status: 200, description: 'Returns accessToken and user object.' })
+    @ApiResponse({ status: 401, description: 'Invalid credentials.' })
     @Post('login')
     async logIn(@Body() logInDto: LogInDto, @Res({ passthrough: true }) response: Response) {
         const { accessToken, refreshToken, user } = await this.authService.logIn(logInDto);
@@ -87,6 +98,8 @@ export class AuthController {
         return { accessToken, user };
     }
 
+    @ApiOperation({ summary: 'Refresh access token using the Refresh cookie' })
+    @ApiResponse({ status: 200, description: 'Returns new accessToken.' })
     @Post('refresh')
     async refresh(@Req() req: Request, @Res({ passthrough: true }) response: Response) {
         const refreshToken = req.cookies?.['Refresh'];
@@ -152,6 +165,9 @@ export class AuthController {
         response.redirect(`${frontendUrl}/auth/callback?accessToken=${tokens.accessToken}&userId=${user._id}`);
     }
 
+    @ApiBearerAuth('access-token')
+    @ApiOperation({ summary: 'Logout — clears refresh token' })
+    @ApiResponse({ status: 200, description: 'Logged out successfully.' })
     @Get('logout')
     @UseGuards(AuthGuard('jwt'))
     async logout(@Req() req, @Res({ passthrough: true }) response: Response) {

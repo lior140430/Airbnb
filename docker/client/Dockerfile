@@ -1,37 +1,24 @@
-# Stage 1: Build
-FROM node:18-alpine AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY apps/client/package.json apps/client/package-lock.json ./
-
-# Install dependencies
-RUN npm ci
-
-# Copy source code
-COPY apps/client/ .
-
-# Build the application
-RUN npm run build
-
-# Stage 2: Runtime
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install serve to run the application
-RUN npm install -g serve
+# Copy root and client package files
+COPY package.json package.json
+COPY apps/client/package.json apps/client/package.json
 
-# Copy built application from builder
-COPY --from=builder /app/dist ./dist
+# Install dependencies
+RUN npm install
 
-# Expose port
+# Copy all source code
+COPY apps/client/ apps/client/
+
+# Expose port 5173 (Vite dev server)
 EXPOSE 5173
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:5173', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+# Set environment variables for API communication within Docker
+ENV VITE_AUTH_API_URL=http://auth-service:3000
+ENV VITE_PROPERTY_API_URL=http://property-service:3001
 
-# Start the application
-CMD ["serve", "-s", "dist", "-l", "5173"]
+# Start dev server with host binding (0.0.0.0) to be accessible from outside container
+WORKDIR /app/apps/client
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

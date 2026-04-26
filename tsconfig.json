@@ -10,7 +10,7 @@
     "baseUrl": "./",
     "paths": {
       "@/*": [
-        "./apps/*/src/*"
+        "./apps/client/src/*"
       ]
     },
     "strict": true,
