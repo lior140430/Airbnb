@@ -1,10 +1,11 @@
 import { useAuth } from '@/context/AuthContext';
 import { useChatContext } from '@/context/ChatContext';
-import { X } from 'lucide-react';
-import React, { useEffect } from 'react';
+import { Plus, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import './ChatDrawer.css';
 import { ChatWindow } from './ChatWindow';
 import { ConversationItem } from './ConversationItem';
+import { NewChatPanel } from './NewChatPanel';
 
 export const ChatDrawer: React.FC = () => {
     const { user } = useAuth();
@@ -17,6 +18,15 @@ export const ChatDrawer: React.FC = () => {
         usersCache,
         fetchUser,
     } = useChatContext();
+
+    const [view, setView] = useState<'list' | 'new'>('list');
+
+    /* Reset view when drawer closes or a conversation becomes active */
+    useEffect(() => {
+        if (!isChatOpen || activeConversation) {
+            setView('list');
+        }
+    }, [isChatOpen, activeConversation]);
 
     /* Ensure we have user data for all conversation participants */
     useEffect(() => {
@@ -54,18 +64,29 @@ export const ChatDrawer: React.FC = () => {
             <div className={`cd-drawer ${isChatOpen ? 'cd-drawer-open' : ''}`}>
                 {activeConversation ? (
                     <ChatWindow />
+                ) : view === 'new' ? (
+                    <NewChatPanel onBack={() => setView('list')} />
                 ) : (
                     <>
                         {/* Header */}
                         <div className="cd-header">
                             <h2 className="cd-title">הודעות</h2>
-                            <button
-                                className="cd-close-btn"
-                                onClick={handleClose}
-                                aria-label="סגירה"
-                            >
-                                <X size={20} />
-                            </button>
+                            <div className="cd-header-actions">
+                                <button
+                                    className="cd-icon-btn"
+                                    onClick={() => setView('new')}
+                                    aria-label="שיחה חדשה"
+                                >
+                                    <Plus size={20} />
+                                </button>
+                                <button
+                                    className="cd-icon-btn"
+                                    onClick={handleClose}
+                                    aria-label="סגירה"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Conversations list */}

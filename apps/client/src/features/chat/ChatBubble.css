@@ -20,7 +20,7 @@
 }
 
 .cb-bubble-mine {
-    background-color: var(--brand-joy, #FF385C);
+    background-color: var(--brand-rose, #FF385C);
     color: #fff;
     border-radius: 16px 16px 4px 16px;
 }

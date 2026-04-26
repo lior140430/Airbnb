@@ -48,6 +48,8 @@ interface ChatContextType {
     startTyping: (receiverId: string) => void;
     stopTyping: (receiverId: string) => void;
     fetchUser: (userId: string) => Promise<ChatUser | null>;
+    openChatWithUser: (userId: string) => Promise<void>;
+    searchUsers: (q: string) => Promise<ChatUser[]>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -73,6 +75,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isTyping, setIsTyping] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [usersCache, setUsersCache] = useState<Record<string, ChatUser>>({});
+
+    const isChatOpenRef = useRef(false);
+    useEffect(() => {
+        isChatOpenRef.current = isChatOpen;
+    }, [isChatOpen]);
+
+    const activeConversationRef = useRef<string | null>(null);
+    useEffect(() => {
+        activeConversationRef.current = activeConversation;
+    }, [activeConversation]);
 
     /* ---------- fetch helpers ---------- */
 
@@ -176,48 +188,44 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
 
             // Add to messages if active conversation matches
-            setActiveConversation((currentActive) => {
-                const otherUserId =
-                    msg.senderId === user?._id ? msg.receiverId : msg.senderId;
-                if (currentActive === otherUserId) {
-                    setMessages((prev) => [...prev, msg]);
-                }
-                return currentActive;
-            });
+            const otherUserId =
+                msg.senderId === user?._id ? msg.receiverId : msg.senderId;
+            if (activeConversationRef.current === otherUserId) {
+                setMessages((prev) => [...prev, msg]);
+            }
 
             // Update unread count for messages not in active view
             if (msg.senderId !== user?._id) {
-                setUnreadCount((prev) => prev + 1);
+                const isViewing =
+                    isChatOpenRef.current &&
+                    activeConversationRef.current === msg.senderId;
+                if (!isViewing) {
+                    setUnreadCount((prev) => prev + 1);
+                }
             }
 
             // Pre-fetch sender info
             fetchUser(msg.senderId);
         });
 
-        socket.on('messages_read', ({ userId }: { userId: string }) => {
+        socket.on('messages_read', ({ readBy }: { readBy: string }) => {
             setMessages((prev) =>
                 prev.map((m) =>
-                    m.receiverId === userId ? { ...m, read: true } : m,
+                    m.receiverId === readBy ? { ...m, read: true } : m,
                 ),
             );
         });
 
         socket.on('user_typing', ({ userId }: { userId: string }) => {
-            setActiveConversation((currentActive) => {
-                if (currentActive === userId) {
-                    setIsTyping(true);
-                }
-                return currentActive;
-            });
+            if (activeConversationRef.current === userId) {
+                setIsTyping(true);
+            }
         });
 
         socket.on('user_stop_typing', ({ userId }: { userId: string }) => {
-            setActiveConversation((currentActive) => {
-                if (currentActive === userId) {
-                    setIsTyping(false);
-                }
-                return currentActive;
-            });
+            if (activeConversationRef.current === userId) {
+                setIsTyping(false);
+            }
         });
 
         socket.on('user_online', () => {
@@ -248,6 +256,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setMessages([]);
         }
     }, [activeConversation, fetchMessages]);
+
+    /* ---------- refresh conversations when drawer opens ---------- */
+
+    useEffect(() => {
+        if (isChatOpen && token) {
+            fetchConversations();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isChatOpen]);
 
     /* ---------- actions ---------- */
 
@@ -290,6 +307,34 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsChatOpen((prev) => !prev);
     }, []);
 
+    const openChatWithUser = useCallback(
+        async (userId: string) => {
+            setIsChatOpen(true);
+            setActiveConversation(userId);
+            await fetchUser(userId);
+        },
+        [fetchUser],
+    );
+
+    const searchUsers = useCallback(
+        async (q: string): Promise<ChatUser[]> => {
+            if (!token || q.trim().length < 2) return [];
+            try {
+                const { data } = await axios.get<ChatUser[]>(
+                    `${AUTH_API_URL}/users/search`,
+                    {
+                        params: { q },
+                        headers: { Authorization: `Bearer ${token}` },
+                    },
+                );
+                return data;
+            } catch {
+                return [];
+            }
+        },
+        [token],
+    );
+
     return (
         <ChatContext.Provider
             value={{
@@ -308,6 +353,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 startTyping,
                 stopTyping,
                 fetchUser,
+                openChatWithUser,
+                searchUsers,
             }}
         >
             {children}

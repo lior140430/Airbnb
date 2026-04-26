@@ -21,7 +21,7 @@ interface PropertyDetailProps {
 
 export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onRefresh }) => {
     const { isAuthenticated, openAuthDialog, user } = useAuth();
-    const { setActiveConversation, setIsChatOpen } = useChatContext();
+    const { openChatWithUser } = useChatContext();
     const [isLiked, setIsLiked] = useState<boolean>(property.isLiked || false);
 
     const isOwnProperty = user?._id === property.ownerId;
@@ -31,8 +31,7 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onRefr
             openAuthDialog();
             return;
         }
-        setActiveConversation(property.ownerId);
-        setIsChatOpen(true);
+        openChatWithUser(property.ownerId);
     };
 
     const handleLikeClick = async (e: React.MouseEvent) => {
