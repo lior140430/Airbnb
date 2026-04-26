@@ -59,7 +59,7 @@ export class ChatService {
           { senderId: otherUserId, receiverId: userId },
         ],
       })
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: 1 })
       .skip(skip)
       .limit(limit)
       .exec();

@@ -26,7 +26,7 @@ interface UserProfile {
 export const ProfileScreen: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { user: currentUser, login } = useAuth();
-    const { setActiveConversation, setIsChatOpen } = useChatContext();
+    const { openChatWithUser } = useChatContext();
     const [isEditing, setIsEditing] = React.useState(false);
 
     const isOwnProfile = currentUser && (id === currentUser._id || !id);
@@ -162,8 +162,7 @@ export const ProfileScreen: React.FC = () => {
                     <button
                         className="profile-send-message-btn"
                         onClick={() => {
-                            setActiveConversation(profileId);
-                            setIsChatOpen(true);
+                            openChatWithUser(profileId);
                         }}
                     >
                         <MessageCircle size={18} />

@@ -19,7 +19,7 @@ export class ChatController {
 
   @Get('conversations')
   async getConversations(@Req() req) {
-    const userId = req.user.sub;
+    const userId = req.user._id;
     return this.chatService.getConversations(userId);
   }
 
@@ -30,7 +30,7 @@ export class ChatController {
     @Query('page') page = '1',
     @Query('limit') limit = '50',
   ) {
-    const userId = req.user.sub;
+    const userId = req.user._id;
     return this.chatService.getMessages(
       userId,
       otherUserId,
@@ -45,20 +45,20 @@ export class ChatController {
     @Body('receiverId') receiverId: string,
     @Body('text') text: string,
   ) {
-    const userId = req.user.sub;
+    const userId = req.user._id;
     return this.chatService.sendMessage(userId, receiverId, text);
   }
 
   @Patch('read/:userId')
   async markAsRead(@Req() req, @Param('userId') otherUserId: string) {
-    const userId = req.user.sub;
+    const userId = req.user._id;
     await this.chatService.markAsRead(userId, otherUserId);
     return { success: true };
   }
 
   @Get('unread')
   async getUnreadCount(@Req() req) {
-    const userId = req.user.sub;
+    const userId = req.user._id;
     const count = await this.chatService.getUnreadCount(userId);
     return { count };
   }
