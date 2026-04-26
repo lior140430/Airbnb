@@ -37,7 +37,6 @@ interface ChatContextType {
     activeConversation: string | null;
     messages: ChatMessage[];
     unreadCount: number;
-    unreadByUser: Record<string, number>;
     isTyping: boolean;
     isChatOpen: boolean;
     usersCache: Record<string, ChatUser>;
@@ -49,7 +48,6 @@ interface ChatContextType {
     startTyping: (receiverId: string) => void;
     stopTyping: (receiverId: string) => void;
     fetchUser: (userId: string) => Promise<ChatUser | null>;
-    openChatWithUser: (userId: string) => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -72,7 +70,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [activeConversation, setActiveConversation] = useState<string | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
-    const [unreadByUser, setUnreadByUser] = useState<Record<string, number>>({});
     const [isTyping, setIsTyping] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [usersCache, setUsersCache] = useState<Record<string, ChatUser>>({});
@@ -153,15 +150,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         socketRef.current = socket;
 
-        // Error handling
-        socket.on('connect_error', (error) => {
-            console.error('Chat connection error:', error);
-        });
-
-        socket.on('disconnect', (reason) => {
-            console.warn('Chat disconnected:', reason);
-        });
-
         socket.on('new_message', (msg: ChatMessage) => {
             // Update conversations list
             setConversations((prev) => {
@@ -200,11 +188,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             // Update unread count for messages not in active view
             if (msg.senderId !== user?._id) {
                 setUnreadCount((prev) => prev + 1);
-                // Track unread by sender
-                setUnreadByUser((prev) => ({
-                    ...prev,
-                    [msg.senderId]: (prev[msg.senderId] || 0) + 1,
-                }));
             }
 
             // Pre-fetch sender info
@@ -270,15 +253,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const sendMessage = useCallback(
         (receiverId: string, text: string) => {
-            try {
-                if (!socketRef.current?.connected) {
-                    console.error('Socket not connected');
-                    return;
-                }
-                socketRef.current.emit('send_message', { receiverId, text });
-            } catch (error) {
-                console.error('Failed to send message:', error);
-            }
+            socketRef.current?.emit('send_message', { receiverId, text });
         },
         [],
     );
@@ -291,16 +266,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     m.senderId === userId && !m.read ? { ...m, read: true } : m,
                 ),
             );
-            // Update unread counts
-            const userUnread = unreadByUser[userId] || 0;
-            setUnreadCount((prev) => Math.max(0, prev - userUnread));
-            setUnreadByUser((prev) => {
-                const updated = { ...prev };
-                delete updated[userId];
-                return updated;
-            });
+            // Recalculate unread
+            setUnreadCount((prev) => Math.max(0, prev - 1));
         },
-        [unreadByUser],
+        [],
     );
 
     const startTyping = useCallback(
@@ -321,15 +290,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsChatOpen((prev) => !prev);
     }, []);
 
-    const openChatWithUser = useCallback(
-        async (userId: string) => {
-            setIsChatOpen(true);
-            setActiveConversation(userId);
-            await fetchUser(userId);
-        },
-        [fetchUser],
-    );
-
     return (
         <ChatContext.Provider
             value={{
@@ -337,7 +297,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 activeConversation,
                 messages,
                 unreadCount,
-                unreadByUser,
                 isTyping,
                 isChatOpen,
                 usersCache,
@@ -349,7 +308,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 startTyping,
                 stopTyping,
                 fetchUser,
-                openChatWithUser,
             }}
         >
             {children}

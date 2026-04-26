@@ -1,0 +1,164 @@
+.profile-screen-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #dddddd;
+    padding: 32px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    margin-bottom: 48px;
+}
+
+.profile-header-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+}
+
+.profile-avatar-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.profile-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #dddddd;
+}
+
+.avatar-edit-overlay {
+    position: absolute;
+    bottom: -60px;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.profile-info-section {
+    flex: 1;
+}
+
+.profile-info-section h1 {
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.profile-email {
+    font-size: 16px;
+    color: #717171;
+}
+
+.edit-form {
+    display: flex;
+    gap: 16px;
+    max-width: 400px;
+}
+
+.profile-actions-top {
+    display: flex;
+    gap: 8px;
+}
+
+.icon-action-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #dddddd;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.icon-action-btn:hover {
+    background: #f7f7f7;
+    border-color: black;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.profile-posts-section h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+}
+
+.posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 24px;
+}
+
+.post-card {
+    border-radius: 12px;
+    overflow: hidden;
+    /* border: 1px solid #dddddd; */
+}
+
+.post-image {
+    width: 100%;
+    aspect-ratio: 1;
+    /* Square posts */
+    object-fit: cover;
+    border-radius: 12px;
+}
+
+.post-details {
+    padding: 12px 0;
+}
+
+.post-details h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.post-details p {
+    font-size: 14px;
+    color: #717171;
+}
+
+.profile-message-section {
+    margin-bottom: 32px;
+}
+
+.profile-send-message-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    background: var(--brand-joy, #FF385C);
+    color: white;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.profile-send-message-btn:hover {
+    opacity: 0.9;
+}
+
+.profile-no-properties {
+    color: #717171;
+    font-size: 15px;
+    padding: 16px 0;
+}

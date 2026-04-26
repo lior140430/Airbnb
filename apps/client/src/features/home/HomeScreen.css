@@ -1,0 +1,161 @@
+/* ── HomeScreen layout ── */
+.hs-container {
+    position: relative;
+    display: flex;
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    transition: all 0.3s ease;
+}
+
+.hs-feed {
+    flex: 1;
+    min-width: 0;
+    transition: flex 0.3s ease;
+}
+
+/* Map toggle button */
+.hs-map-toggle {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--text-main, #222);
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    transition: background 0.2s ease, transform 0.2s ease;
+    direction: rtl;
+}
+
+.hs-map-toggle:hover {
+    background: #000;
+    transform: translateX(-50%) scale(1.04);
+}
+
+/* Map panel */
+.hs-map {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: width 0.3s ease, opacity 0.3s ease;
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 80px);
+}
+
+.hs-container--with-map .hs-feed {
+    flex: 0 0 60%;
+    max-width: 60%;
+}
+
+.hs-container--with-map .hs-map {
+    flex: 0 0 40%;
+    width: 40%;
+    opacity: 1;
+    border-right: 1px solid #ebebeb;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .hs-map-toggle {
+        display: none;
+    }
+
+    .hs-map {
+        display: none;
+    }
+
+    .hs-container--with-map .hs-feed {
+        flex: 1;
+        max-width: 100%;
+    }
+}
+
+/* ── Legacy grid classes (kept for PropertyCard compatibility) ── */
+.home-screen-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 24px;
+    padding: 24px 40px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Card */
+.listing-card {
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.listing-card:hover .listing-image {
+    transform: scale(1.05);
+}
+
+/* Image */
+.listing-image-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 20/19;
+    border-radius: var(--border-radius-main);
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.listing-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s;
+}
+
+.listing-heart {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+/* Details */
+.listing-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.listing-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.listing-location {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.listing-info {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.listing-price {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+.price-bold {
+    font-weight: 600;
+}
