@@ -1,0 +1,10 @@
+.app-container {
+  min-height: 100vh;
+  /* background-color: #f7f9fa;  Moved this to AuthScreen.css or handled by theme */
+}
+
+/* Reset or global styles could go here if not in main.css/index.css */
+body {
+  margin: 0;
+  padding: 0;
+}

@@ -1,0 +1,112 @@
+.pm-container {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.pm-map {
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+/* Price pill marker */
+.pm-price-marker {
+    background: transparent;
+    border: none;
+}
+
+.pm-price-pill {
+    background: var(--bg-primary, #fff);
+    color: var(--text-main, #222);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16);
+    white-space: nowrap;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.pm-price-pill:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+    background: var(--text-main, #222);
+    color: var(--bg-primary, #fff);
+}
+
+/* Popup styles */
+.pm-popup .leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+}
+
+.pm-popup .leaflet-popup-content {
+    margin: 0;
+    width: auto !important;
+}
+
+.pm-popup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    direction: rtl;
+    text-align: right;
+    min-width: 160px;
+}
+
+.pm-popup-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-main, #222);
+    line-height: 1.3;
+}
+
+.pm-popup-price {
+    font-size: 0.875rem;
+    color: var(--text-main, #222);
+    font-weight: 500;
+}
+
+.pm-popup-location {
+    font-size: 0.8125rem;
+    color: var(--text-muted, #717171);
+}
+
+.pm-popup-link {
+    margin-top: 6px;
+    background: var(--brand-joy, #FF385C);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s ease;
+}
+
+.pm-popup-link:hover {
+    background: #e0314f;
+}
+
+/* Empty state */
+.pm-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f7f7f7;
+    border-radius: 12px;
+    border: 1px solid #ebebeb;
+}
+
+.pm-empty-text {
+    color: var(--text-muted, #717171);
+    font-size: 0.9375rem;
+}

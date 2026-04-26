@@ -1,0 +1,67 @@
+.btn {
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Primary (Brand) Button */
+.btn-primary {
+    background-image: linear-gradient(to right, #E61E4D 0%, #E31C5F 50%, #D80565 100%);
+    background-size: 200% auto;
+    color: white;
+    height: 48px;
+    width: 100%;
+    /* Default full width for primary usually */
+}
+
+.btn-primary:not(:disabled):hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    background-position: right center;
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* Social Button */
+.btn-social {
+    background: white;
+    border: 1px solid #b0b0b0;
+    color: #222222;
+    height: 48px;
+    width: 100%;
+}
+
+.btn-social:hover {
+    border-color: black;
+    background-color: #f7f7f7;
+}
+
+/* Outline Button */
+.btn-outline {
+    background: white;
+    border: 2px solid var(--text-main);
+    color: var(--text-main);
+    height: 48px;
+    padding: 0 24px;
+}
+
+.btn-outline:not(:disabled):hover {
+    background-color: var(--bg-light);
+}
+
+.btn-outline:active {
+    transform: scale(0.98);
+}
