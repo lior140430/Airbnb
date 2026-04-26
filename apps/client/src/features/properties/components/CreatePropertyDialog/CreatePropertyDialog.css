@@ -1,0 +1,148 @@
+.create-property-content {
+    width: 600px;
+    max-width: 95vw;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.progress-bar-container {
+    height: 4px;
+    width: 100%;
+    background-color: #DDDDDD;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: var(--brand-rose);
+    transition: width 0.3s ease-in-out;
+}
+
+.create-property-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.create-property-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ── Step 2: Specs ── */
+.cpd-section-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text-main);
+}
+
+.cpd-spec-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.cpd-spec-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.cpd-spec-row:last-child {
+    border-bottom: none;
+}
+
+.cpd-spec-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.cpd-counter {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cpd-counter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    color: var(--text-main);
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.cpd-counter-btn:hover:not(:disabled) {
+    border-color: var(--text-main);
+}
+
+.cpd-counter-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.cpd-counter-val {
+    font-size: 16px;
+    font-weight: 600;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* ── Step 2: Amenities ── */
+.cpd-amenity-hint {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+}
+
+.cpd-amenity-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.cpd-amenity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--border-radius-pill);
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--text-main);
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.cpd-amenity-badge:hover {
+    border-color: var(--text-main);
+}
+
+.cpd-amenity-badge.selected {
+    border-color: var(--text-main);
+    background: var(--text-main);
+    color: #fff;
+}
