@@ -1,0 +1,79 @@
+.ci-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid var(--border-default, #ddd);
+    direction: rtl;
+}
+
+.ci-container:hover {
+    background-color: #f7f7f7;
+}
+
+.ci-active {
+    background-color: #f0f0f0;
+}
+
+.ci-avatar {
+    flex-shrink: 0;
+}
+
+.ci-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ci-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ci-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-main, #222);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ci-time {
+    font-size: 12px;
+    color: var(--text-muted, #717171);
+    flex-shrink: 0;
+    margin-right: auto;
+    margin-left: 0;
+    padding-right: 8px;
+}
+
+.ci-bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ci-last-message {
+    font-size: 13px;
+    color: var(--text-muted, #717171);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.ci-unread-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--brand-joy, #FF385C);
+    flex-shrink: 0;
+    margin-right: auto;
+    margin-left: 0;
+}
