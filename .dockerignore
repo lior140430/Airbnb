@@ -6,3 +6,7 @@ dist
 README.md
 .env
 .env.example
+docker/mongodb_data
+.next
+.DS_Store
+*.log
