@@ -16,7 +16,6 @@ export const ChatDrawer: React.FC = () => {
         setActiveConversation,
         usersCache,
         fetchUser,
-        unreadByUser,
     } = useChatContext();
 
     /* Ensure we have user data for all conversation participants */
@@ -82,7 +81,6 @@ export const ChatDrawer: React.FC = () => {
                                     );
                                     if (!otherId) return null;
                                     const otherUser = usersCache[otherId] || null;
-                                    const unread = unreadByUser[otherId] || 0;
 
                                     return (
                                         <ConversationItem
@@ -91,7 +89,7 @@ export const ChatDrawer: React.FC = () => {
                                             lastMessage={conv.lastMessage}
                                             lastMessageAt={conv.lastMessageAt}
                                             isActive={activeConversation === otherId}
-                                            unreadCount={unread}
+                                            unreadCount={0}
                                             onClick={() => handleConversationClick(otherId)}
                                         />
                                     );
