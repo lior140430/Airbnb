@@ -1,38 +1,54 @@
-import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+export type PropertyDocument = Property & Document;
+
 @Schema({ timestamps: true })
-export class Property extends Document {
-  @Prop({ required: true })
-  title: string;
+export class Property {
+    @Prop({ required: true })
+    title: string;
 
-  @Prop()
-  description: string;
+    @Prop({ required: true })
+    description: string;
 
-  @Prop({ required: true })
-  price: number;
+    @Prop({ required: true })
+    price: number;
 
-  @Prop({ required: true })
-  bedrooms: number;
+    @Prop({
+        type: {
+            city: { type: String, required: true },
+            street: { type: String, required: true },
+        },
+        required: true,
+    })
+    location: {
+        city: string;
+        street: string;
+    };
 
-  @Prop({ required: true })
-  bathrooms: number;
+    @Prop([String])
+    images: string[];
 
-  @Prop({ type: { type: String }, coordinates: [Number] })
-  location: { type: string; coordinates: [number, number] };
+    @Prop({ required: true, index: true })
+    ownerId: string;
 
-  @Prop({ required: true })
-  ownerId: string;
+    @Prop({ default: 2 })
+    maxGuests: number;
 
-  @Prop({ default: 0 })
-  rating: number;
+    @Prop({ default: 1 })
+    bedrooms: number;
 
-  @Prop({ default: [] })
-  images: string[];
+    @Prop({ default: 1 })
+    beds: number;
 
-  @Prop({ default: false })
-  available: boolean;
+    @Prop({ default: 1 })
+    bathrooms: number;
+
+    @Prop([String])
+    amenities: string[];
+
+    @Prop({ type: { lat: Number, lng: Number }, default: null })
+    coordinates?: { lat: number; lng: number };
 }
 
 export const PropertySchema = SchemaFactory.createForClass(Property);
-PropertySchema.index({ 'location': '2dsphere' });
