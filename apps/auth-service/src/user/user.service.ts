@@ -29,6 +29,20 @@ export class UserService {
         return this.userModel.findById(id).exec();
     }
 
+    async search(query: string, excludeUserId: string, limit = 10): Promise<UserDocument[]> {
+        const q = (query ?? '').trim();
+        if (q.length < 2) return [];
+        const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escaped, 'i');
+        return this.userModel
+            .find({
+                _id: { $ne: excludeUserId },
+                $or: [{ firstName: regex }, { lastName: regex }, { email: regex }],
+            })
+            .limit(limit)
+            .exec();
+    }
+
     async update(id: string, updateData: Partial<User>): Promise<UserDocument | null> {
         return this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
     }

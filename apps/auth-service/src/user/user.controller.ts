@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Patch, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from './user.service';
 import { UpdateProfileDto } from '../auth/dto/update-profile.dto';
@@ -6,6 +6,16 @@ import { UpdateProfileDto } from '../auth/dto/update-profile.dto';
 @Controller('users')
 export class UserController {
     constructor(private readonly userService: UserService) { }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get('search')
+    async searchUsers(@Req() req, @Query('q') q: string) {
+        const users = await this.userService.search(q, req.user.sub);
+        return users.map((u) => {
+            const { password, currentHashedRefreshToken, ...rest } = u.toObject();
+            return rest;
+        });
+    }
 
     @Get(':id')
     async getUser(@Param('id') id: string) {
