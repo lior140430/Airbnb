@@ -1,8 +1,8 @@
 import { Body, Controller, ForbiddenException, Get, NotFoundException, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserService } from './user.service';
 import { UpdateProfileDto } from '../auth/dto/update-profile.dto';
+import { UserService } from './user.service';
 
 @ApiTags('users')
 @Controller('users')
