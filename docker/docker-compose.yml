@@ -52,16 +52,15 @@ services:
       - ../uploads/properties:/usr/src/app/apps/property-service/uploads
 
   client:
-    image: node:18
+    build:
+      context: ../
+      dockerfile: docker/client/Dockerfile
     container_name: homeseek-client
     ports:
       - "5173:5173"
-    working_dir: /usr/src/app
-    volumes:
-      - ../apps/client:/usr/src/app
-      - /usr/src/app/node_modules
-      - ../uploads:/usr/src/app/uploads
-    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - auth-service
+      - property-service
     networks:
       - homeseek-network
 
