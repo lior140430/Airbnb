@@ -1,0 +1,134 @@
+.dialog-overlay {
+    background-color: rgba(0, 0, 0, 0.4);
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog-content {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 38px -10px hsl(206 22% 7% / 35%), 0 10px 20px -15px hsl(206 22% 7% / 20%);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 450px;
+    max-height: 85vh;
+    padding: 24px;
+    animation: contentShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1001;
+    direction: rtl;
+}
+
+.dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.dialog-title {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.dialog-close {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dialog-close:hover {
+    background-color: #f7f7f7;
+}
+
+@keyframes overlayShow {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes contentShow {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.profile-info h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.profile-info p {
+    margin: 4px 0 0 0;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.profile-divider {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 16px 0;
+}
+
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-action-button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-main);
+    transition: background 0.2s;
+    text-align: right;
+    /* RTL alignment */
+}
+
+.profile-action-button:hover {
+    background-color: #f7f7f7;
+}
+
+.profile-action-button.logout {
+    color: #c13515;
+    /* Warning/Red color for logout */
+}
+
+.profile-action-button.logout:hover {
+    background-color: #fff8f6;
+}

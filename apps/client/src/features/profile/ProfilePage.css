@@ -1,0 +1,386 @@
+/* ================================================
+   Profile Page - Airbnb-style with sidebar nav
+   ================================================ */
+
+/* -- Layout -- */
+.pp {
+    display: flex;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    gap: 64px;
+    min-height: calc(100vh - 80px);
+}
+
+.pp-auth-wall {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    color: var(--text-muted);
+}
+
+/* -- Sidebar -- */
+.pp-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 120px;
+    align-self: flex-start;
+}
+
+.pp-sidebar-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 28px;
+}
+
+/* -- Nav -- */
+.pp-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pp-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border: none;
+    background: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-main);
+    transition: background 0.15s;
+    text-align: right;
+    width: 100%;
+}
+
+.pp-nav-item:hover {
+    background: var(--bg-light);
+}
+
+.pp-nav-item--active {
+    background: var(--bg-light);
+    font-weight: 600;
+}
+
+/* -- Main content -- */
+.pp-main {
+    flex: 1;
+    min-width: 0;
+}
+
+/* -- Section header -- */
+.pp-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    gap: 16px;
+}
+
+.pp-section-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.pp-section-count {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.pp-edit-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-pill);
+    padding: 8px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+.pp-edit-btn:hover {
+    background: var(--bg-light);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* -- Hero card (profile center) -- */
+.pp-hero-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    padding: 40px 32px 32px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
+    margin-bottom: 32px;
+    max-width: 420px;
+}
+
+.pp-hero-avatar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.pp-avatar-badge {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand-rose);
+    background: rgba(255, 56, 92, 0.08);
+    padding: 3px 10px;
+    border-radius: var(--border-radius-pill);
+}
+
+.pp-hero-name {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 4px;
+}
+
+.pp-hero-role {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* -- Edit form -- */
+.pp-edit-form {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.pp-edit-form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.pp-form-error {
+    font-size: 13px;
+    color: #c13515;
+    margin: 0 0 12px;
+}
+
+.pp-edit-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* -- Profile completion card -- */
+.pp-complete-card {
+    background: var(--bg-light);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.pp-complete-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 8px;
+}
+
+.pp-complete-desc {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0 0 20px;
+}
+
+/* Saved toast */
+.pp-saved-toast {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #008a05;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: var(--border-radius-pill);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Info line */
+.pp-info-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    border-top: 1px solid var(--border-color);
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* -- Properties grid -- */
+.pp-properties-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--spacing-md);
+}
+
+/* -- Review list -- */
+.pp-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.pp-review-item {
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.pp-review-item:last-child {
+    border-bottom: none;
+}
+
+.pp-review-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.pp-review-date {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.pp-review-stars {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 8px;
+}
+
+.pp-review-text {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-main);
+    margin: 0;
+}
+
+/* -- Loading -- */
+.pp-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 80px 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+/* -- Empty state -- */
+.pp-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 64px 24px;
+    background: var(--bg-light);
+    border: 2px dashed var(--border-color);
+    border-radius: 16px;
+}
+
+.pp-empty-icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    margin-bottom: 20px;
+    color: var(--text-muted);
+}
+
+.pp-empty-title {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 8px;
+}
+
+.pp-empty-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0 0 20px;
+    line-height: 1.6;
+}
+
+/* -- Spin animation -- */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* -- Responsive -- */
+@media (max-width: 768px) {
+    .pp {
+        flex-direction: column;
+        gap: 24px;
+        padding: 24px 16px;
+    }
+
+    .pp-sidebar {
+        width: 100%;
+        position: static;
+    }
+
+    .pp-sidebar-title {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+    }
+
+    .pp-nav {
+        flex-direction: row;
+        overflow-x: auto;
+        gap: 8px;
+    }
+
+    .pp-nav-item {
+        white-space: nowrap;
+        padding: 10px 16px;
+    }
+
+    .pp-hero-card {
+        max-width: 100%;
+    }
+}
