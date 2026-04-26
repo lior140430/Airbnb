@@ -1,12 +1,11 @@
-import { Body, Controller, Get, Patch, Post, Req, Res, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Response, Request } from 'express';
-import { diskStorage } from 'multer';
+import { Request, Response } from 'express';
 import { existsSync, mkdirSync } from 'fs';
-import { extname, join } from 'path';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
 import { LogInDto } from './dto/log-in.dto';

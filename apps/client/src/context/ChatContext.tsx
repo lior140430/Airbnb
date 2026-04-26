@@ -1,4 +1,4 @@
-import { useAuth, type User } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { AUTH_API_URL, PROPERTY_API_URL } from '@/services/api';
 import axios from 'axios';
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
@@ -263,7 +263,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (isChatOpen && token) {
             fetchConversations();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isChatOpen]);
 
     /* ---------- actions ---------- */
