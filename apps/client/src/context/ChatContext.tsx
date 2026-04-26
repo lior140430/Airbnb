@@ -153,6 +153,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         socketRef.current = socket;
 
+        // Error handling
+        socket.on('connect_error', (error) => {
+            console.error('Chat connection error:', error);
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.warn('Chat disconnected:', reason);
+        });
+
         socket.on('new_message', (msg: ChatMessage) => {
             // Update conversations list
             setConversations((prev) => {
@@ -261,7 +270,15 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const sendMessage = useCallback(
         (receiverId: string, text: string) => {
-            socketRef.current?.emit('send_message', { receiverId, text });
+            try {
+                if (!socketRef.current?.connected) {
+                    console.error('Socket not connected');
+                    return;
+                }
+                socketRef.current.emit('send_message', { receiverId, text });
+            } catch (error) {
+                console.error('Failed to send message:', error);
+            }
         },
         [],
     );
