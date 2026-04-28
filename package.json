@@ -6,7 +6,10 @@
     "apps/*"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:all": "npm run build -w apps/auth-service && npm run build -w apps/property-service && npm run build -w apps/client",
+    "prod:env": "cp apps/auth-service/.envprod apps/auth-service/.env && cp apps/property-service/.envprod apps/property-service/.env",
+    "prod": "npm run prod:env && npm run build:all && pm2 startOrRestart ecosystem.config.cjs --env production"
   },
   "keywords": [],
   "author": "",
