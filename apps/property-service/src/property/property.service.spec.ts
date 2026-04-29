@@ -177,7 +177,7 @@ describe('PropertyService', () => {
             propertyModel.findByIdAndUpdate.mockResolvedValue(updated);
 
             const result = await service.update(validObjectId, { price: 600 } as any, 'user123');
-            expect(propertyModel.findByIdAndUpdate).toHaveBeenCalledWith(validObjectId, { price: 600 }, { new: true });
+            expect(propertyModel.findByIdAndUpdate).toHaveBeenCalledWith(validObjectId, { price: 600, images: [] }, { new: true });
             expect(result?.price).toBe(600);
         });
     });

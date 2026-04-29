@@ -17,7 +17,7 @@ const mockUserDoc = (overrides: any = {}) => {
         googleId: null,
         facebookId: null,
         currentHashedRefreshToken: 'hashedRefresh',
-        save: jest.fn().mockResolvedValue(undefined),
+        save: jest.fn().mockImplementation(function () { return Promise.resolve(this); }),
         ...overrides,
     };
     return { ...base, toObject: () => ({ ...base, _id: 'user123' }) };
@@ -232,6 +232,109 @@ describe('AuthService', () => {
 
             expect(result.accessToken).toBe('new-access');
             expect(result.refreshToken).toBe('new-refresh');
+        });
+
+        it('calls updateUserRefreshToken with new refresh token', async () => {
+            (userService.findById as jest.Mock).mockResolvedValue(mockUserDoc());
+            (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+            (tokenService.generateTokens as jest.Mock).mockResolvedValue({
+                accessToken: 'a',
+                refreshToken: 'new-rt',
+            });
+            (tokenService.updateUserRefreshToken as jest.Mock).mockResolvedValue(undefined);
+
+            await service.refreshTokens('user123', 'valid-rt');
+
+            expect(tokenService.updateUserRefreshToken).toHaveBeenCalledWith('user123', 'new-rt');
+        });
+    });
+
+    // ─── validateFacebookUser ───
+    describe('validateFacebookUser', () => {
+        const details = { email: 'dana@test.com', firstName: 'Dana', lastName: 'Cohen', facebookId: 'fb456' };
+
+        it('returns existing user found by facebookId', async () => {
+            const user = mockUserDoc({ facebookId: 'fb456' });
+            (userService.findByFacebookId as jest.Mock).mockResolvedValue(user);
+            const result = await service.validateFacebookUser(details);
+            expect(result).toBe(user);
+        });
+
+        it('links facebookId to existing user found by email', async () => {
+            const user = mockUserDoc({ facebookId: null });
+            (userService.findByFacebookId as jest.Mock).mockResolvedValue(null);
+            (userService.findByEmail as jest.Mock).mockResolvedValue(user);
+            const result = await service.validateFacebookUser(details);
+            expect(result.facebookId).toBe('fb456');
+            expect(user.save).toHaveBeenCalled();
+        });
+
+        it('creates new user when no matching user found', async () => {
+            (userService.findByFacebookId as jest.Mock).mockResolvedValue(null);
+            (userService.findByEmail as jest.Mock).mockResolvedValue(null);
+            const newUser = mockUserDoc({ facebookId: 'fb456' });
+            (userService.create as jest.Mock).mockResolvedValue(newUser);
+
+            const result = await service.validateFacebookUser(details);
+
+            expect(userService.create).toHaveBeenCalledWith(
+                expect.objectContaining({ email: details.email, facebookId: details.facebookId }),
+            );
+            expect(result).toBe(newUser);
+        });
+    });
+
+    // ─── signUp extra coverage ───
+    describe('signUp (extra)', () => {
+        it('only returns accessToken (no refresh token) on sign up', async () => {
+            (userService.findByEmail as jest.Mock).mockResolvedValue(null);
+            (tokenService.hashData as jest.Mock).mockResolvedValue('hashedpwd');
+            (userService.create as jest.Mock).mockResolvedValue(mockUserDoc());
+            (tokenService.generateTokens as jest.Mock).mockResolvedValue({
+                accessToken: 'access-only',
+                refreshToken: 'rt',
+            });
+
+            const result = await service.signUp({ email: 'new@test.com', password: 'Pass1234!', firstName: 'X', lastName: 'Y' });
+
+            expect(result.accessToken).toBe('access-only');
+            expect(result).not.toHaveProperty('refreshToken');
+        });
+    });
+
+    // ─── logIn extra coverage ───
+    describe('logIn (extra)', () => {
+        it('throws UnauthorizedException when user has no password (OAuth-only account)', async () => {
+            (userService.findByEmail as jest.Mock).mockResolvedValue(mockUserDoc({ password: undefined }));
+            (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+            await expect(
+                service.logIn({ email: 'dana@test.com', password: 'Pass1234!' }),
+            ).rejects.toThrow(UnauthorizedException);
+        });
+
+        it('stores hashed refresh token after successful login', async () => {
+            (userService.findByEmail as jest.Mock).mockResolvedValue(mockUserDoc());
+            (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+            (tokenService.generateTokens as jest.Mock).mockResolvedValue({
+                accessToken: 'a',
+                refreshToken: 'rt',
+            });
+            (tokenService.updateUserRefreshToken as jest.Mock).mockResolvedValue(undefined);
+
+            await service.logIn({ email: 'dana@test.com', password: 'Pass1234!' });
+
+            expect(tokenService.updateUserRefreshToken).toHaveBeenCalledWith('user123', 'rt');
+        });
+    });
+
+    // ─── checkEmail extra coverage ───
+    describe('checkEmail (extra)', () => {
+        it('reports both providers linked when user has google and facebook', async () => {
+            const user = mockUserDoc({ password: 'hashed', googleId: 'g123', facebookId: 'fb456' });
+            (userService.findByEmail as jest.Mock).mockResolvedValue(user);
+            const result = await service.checkEmail('dana@test.com') as any;
+            expect(result.googleLinked).toBe(true);
+            expect(result.facebookLinked).toBe(true);
         });
     });
 });
