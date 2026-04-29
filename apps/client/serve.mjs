@@ -9,6 +9,25 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distDir = path.join(__dirname, 'dist');
 
 const app = express();
+
+// Proxy /api/docs (and swagger assets) → property-service on port 4001
+app.use('/api', (req, res) => {
+    const options = {
+        hostname: 'localhost',
+        port: 4001,
+        path: `/api${req.url}`,
+        method: req.method,
+        headers: req.headers,
+        rejectUnauthorized: false,
+    };
+    const proxyReq = https.request(options, (proxyRes) => {
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        proxyRes.pipe(res, { end: true });
+    });
+    proxyReq.on('error', () => res.status(502).send('Swagger proxy error'));
+    req.pipe(proxyReq, { end: true });
+});
+
 app.use(express.static(distDir));
 app.get('*', (_req, res) => res.sendFile(path.join(distDir, 'index.html')));
 
