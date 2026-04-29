@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { existsSync, mkdirSync } from 'fs';
 import { Model, Types } from 'mongoose';
 import { GeocodingService } from '../geo/geocoding.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -18,7 +19,14 @@ export class PropertyService implements OnModuleInit {
         @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
         @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
         private readonly geocodingService: GeocodingService,
-    ) { }
+    ) {
+        // Ensure the uploads directory exists on startup so file uploads never fail
+        const uploadsDir = './uploads/properties';
+        if (!existsSync(uploadsDir)) {
+            mkdirSync(uploadsDir, { recursive: true });
+            this.logger.log(`Created uploads directory: ${uploadsDir}`);
+        }
+    }
 
     async onModuleInit() {
         try {

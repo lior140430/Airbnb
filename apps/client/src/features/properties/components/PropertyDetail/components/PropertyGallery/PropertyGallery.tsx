@@ -1,4 +1,4 @@
-import { getImageUrl, getPlaceholderImageHe } from '@/utils/image';
+import { getImageUrl, handleImageError } from '@/utils/image';
 import React from 'react';
 
 interface PropertyGalleryProps {
@@ -12,14 +12,13 @@ export const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title 
         <div className={`pd-gallery pd-gallery--${Math.min(list.length, 5)}`}>
             {list.slice(0, 5).map((img, i) => (
                 <div className={`pd-gallery-cell pd-gallery-cell--${i}`} key={i}>
-                    <img src={getImageUrl(img)} alt={`${title} ${i + 1}`} />
+                    <img
+                        src={getImageUrl(img)}
+                        alt={`${title} ${i + 1}`}
+                        onError={handleImageError}
+                    />
                 </div>
             ))}
-            {list.length === 0 && (
-                <div className="pd-gallery-cell pd-gallery-cell--0">
-                    <img src={getPlaceholderImageHe()} alt={title} />
-                </div>
-            )}
             {list.length > 5 && (
                 <button className="pd-gallery-show-all">
                     הצג את כל התמונות
