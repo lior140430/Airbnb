@@ -12,8 +12,10 @@ const path = require('path');
 const MONGO_URI = process.env.MONGODB_URI ||
     'mongodb://server:e5f5c26a7580f0bac585c1d50369c1227114184f9c92f048@localhost:21771/homeseek';
 
-const IMG = (id) =>
-    `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=800&q=80`;
+// AI-generated images via Pollinations.ai
+// Same prompt + seed always produces the same image — no 404s, no duplicates
+const AI = (prompt, seed) =>
+    `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${seed}&width=800&height=600&nologo=true&model=flux`;
 
 const PROPERTIES = [
     // ── Lior's 5 properties ──────────────────────────────────────────────
@@ -23,9 +25,9 @@ const PROPERTIES = [
         price: 850,
         location: { city: 'תל אביב', street: 'דיזנגוף 45' },
         images: [
-            IMG('1502672260266-1c1ef2d93688'),  // B ✓
-            IMG('1556909114-f6e7ad7d3136'),      // E ✓
-            IMG('1560448204-e02f11c3d0e2'),      // G ✓
+            AI('luxury garden apartment Tel Aviv private pool terrace sunlight modern', 101),
+            AI('elegant living room white sofa large windows garden view Tel Aviv', 102),
+            AI('private swimming pool luxury garden apartment Israel sunny day', 103),
         ],
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'pool', 'parking', 'airConditioning'],
@@ -37,9 +39,9 @@ const PROPERTIES = [
         price: 450,
         location: { city: 'תל אביב', street: 'רוטשילד 12' },
         images: [
-            IMG('1545324418-cc1a3fa10c00'),      // D ✓
-            IMG('1584622650111-993a426fbf0a'),    // K ✓
-            IMG('1512917774080-9991f1c4c750'),    // C ✓
+            AI('modern studio apartment interior design Tel Aviv minimalist chic', 201),
+            AI('stylish studio loft open plan kitchen living area city view', 202),
+            AI('cozy studio apartment bedroom workspace city skyline window', 203),
         ],
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['wifi', 'airConditioning'],
@@ -51,9 +53,9 @@ const PROPERTIES = [
         price: 600,
         location: { city: 'חיפה', street: 'הכרמל 7' },
         images: [
-            IMG('1571508601891-ca5e7a713859'),    // I ✓
-            IMG('1600566752355-35792bedcfea'),    // N ✓
-            IMG('1558618666-fcd25c85cd64'),       // F ✓
+            AI('spacious apartment balcony Mediterranean sea view Haifa Carmel Israel blue sky', 301),
+            AI('bright apartment living room panoramic sea view large windows', 302),
+            AI('master bedroom sea view balcony Mediterranean coast morning light', 303),
         ],
         maxGuests: 6, bedrooms: 3, beds: 4, bathrooms: 2,
         amenities: ['wifi', 'parking', 'airConditioning'],
@@ -65,9 +67,9 @@ const PROPERTIES = [
         price: 700,
         location: { city: 'ראש פינה', street: 'הגפן 3' },
         images: [
-            IMG('1560472354-b33ff0c44a43'),      // P ✓
-            IMG('1598928506311-c55ded91a20c'),    // M ✓
-            IMG('1631049307264-da0ec9d70304'),    // O ✓
+            AI('charming stone house Galilee Israel green hills vineyard rustic exterior', 401),
+            AI('rustic stone house interior wooden beams cozy living room fireplace Galilee', 402),
+            AI('stone house garden vineyard Galilee sunset Israel countryside quiet', 403),
         ],
         maxGuests: 8, bedrooms: 4, beds: 5, bathrooms: 2,
         amenities: ['wifi', 'parking', 'petFriendly'],
@@ -79,9 +81,9 @@ const PROPERTIES = [
         price: 380,
         location: { city: 'מצפה רמון', street: 'דרך הנחל 1' },
         images: [
-            IMG('1513694203232-719a280e022f'),    // Q ✓
-            IMG('1497366216548-37526070297c'),    // R ✓
-            IMG('1524758631624-e2822e304c36'),    // S ✓
+            AI('luxury glamping tent desert Israel Negev Mitzpe Ramon starry night sky', 501),
+            AI('glamping tent interior cozy bed fairy lights desert night', 502),
+            AI('Ramon crater desert landscape Israel Negev sunrise dramatic', 503),
         ],
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['breakfast'],
@@ -95,9 +97,9 @@ const PROPERTIES = [
         price: 1200,
         location: { city: 'ירושלים', street: 'המלך דוד 5' },
         images: [
-            IMG('1493809842364-78817add7ffb'),    // A ✓
-            IMG('1560448204-e02f11c3d0e2'),       // G ✓
-            IMG('1600566752355-35792bedcfea'),    // N ✓
+            AI('luxury penthouse Jerusalem panoramic view Old City golden dome sunset', 601),
+            AI('penthouse rooftop terrace Jerusalem stone walls old city view evening', 602),
+            AI('modern penthouse interior Jerusalem Jerusalem stone walls high ceiling luxury', 603),
         ],
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 2,
         amenities: ['wifi', 'parking', 'airConditioning', 'gym'],
@@ -109,9 +111,9 @@ const PROPERTIES = [
         price: 1500,
         location: { city: 'אילת', street: 'תרשיש 8' },
         images: [
-            IMG('1588854337115-1c67d9247e4d'),    // L ✓
-            IMG('1558618666-fcd25c85cd64'),       // F ✓
-            IMG('1598928506311-c55ded91a20c'),    // M ✓
+            AI('luxury villa private swimming pool Eilat Israel Red Sea view palm trees', 701),
+            AI('villa pool terrace Eilat sunny day turquoise water outdoor lounge', 702),
+            AI('luxury villa interior spacious living room Eilat modern design sea view', 703),
         ],
         maxGuests: 10, bedrooms: 5, beds: 6, bathrooms: 3,
         amenities: ['wifi', 'pool', 'parking', 'airConditioning'],
@@ -123,9 +125,9 @@ const PROPERTIES = [
         price: 520,
         location: { city: 'נתניה', street: 'הרצל 22' },
         images: [
-            IMG('1583845112203-29329902332e'),    // J ✓
-            IMG('1556909114-f6e7ad7d3136'),       // E ✓
-            IMG('1584622650111-993a426fbf0a'),    // K ✓
+            AI('classic apartment Netanya Israel balcony garden quiet neighborhood', 801),
+            AI('cozy apartment bedroom Israel natural light wardrobe classic style', 802),
+            AI('apartment living room balcony sea glimpse Netanya Israel afternoon light', 803),
         ],
         maxGuests: 4, bedrooms: 2, beds: 3, bathrooms: 1,
         amenities: ['wifi', 'airConditioning'],
@@ -137,9 +139,9 @@ const PROPERTIES = [
         price: 650,
         location: { city: 'צפת', street: 'אלכסנדר זייד 4' },
         images: [
-            IMG('1524758631624-e2822e304c36'),    // S ✓
-            IMG('1497366216548-37526070297c'),    // R ✓
-            IMG('1631049307264-da0ec9d70304'),    // O ✓
+            AI('ancient boutique house Safed Tzfat Israel artists quarter mystical stone', 901),
+            AI('renovated old stone house interior Safed Israel artistic warm lighting', 902),
+            AI('stone alley Safed Israel old city boutique house arched door blue', 903),
         ],
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'parking'],
@@ -151,9 +153,9 @@ const PROPERTIES = [
         price: 280,
         location: { city: 'באר שבע', street: 'רגר 10' },
         images: [
-            IMG('1564078516393-cf04bd966897'),    // H ✓
-            IMG('1560448204-e02f11c3d0e2'),       // G ✓
-            IMG('1556909114-f6e7ad7d3136'),       // E ✓
+            AI('clean modern studio apartment Beer Sheva Israel university area', 1001),
+            AI('functional studio bedroom desk workspace Israel minimalist', 1002),
+            AI('compact apartment living area Israel city modern practical', 1003),
         ],
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['wifi'],
