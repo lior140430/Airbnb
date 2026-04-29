@@ -174,9 +174,9 @@ describe('PropertyController', () => {
             (propertyService.update as jest.Mock).mockResolvedValue(updated);
             const req = { user: { _id: 'user123' } };
 
-            const result = await controller.update(validObjectId, { price: 600 } as any, req as any);
+            const result = await controller.update(validObjectId, { price: 600 } as any, [], req as any);
 
-            expect(propertyService.update).toHaveBeenCalledWith(validObjectId, { price: 600 }, 'user123');
+            expect(propertyService.update).toHaveBeenCalledWith(validObjectId, { price: 600 }, 'user123', []);
             expect(result).toEqual(updated);
         });
     });
