@@ -32,7 +32,12 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onRefr
             return;
         }
         if (property.ownerId) {
-            openChatWithUser(property.ownerId);
+            openChatWithUser(property.ownerId, {
+                _id: property._id,
+                title: property.title,
+                price: property.price,
+                image: property.images?.[0],
+            });
         }
     };
 
@@ -72,10 +77,12 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onRefr
                 street={property.location.street}
             />
 
-            <PropertyGallery
-                images={property.images || []}
-                title={property.title}
-            />
+            {(property.images?.length ?? 0) > 0 && (
+                <PropertyGallery
+                    images={property.images}
+                    title={property.title}
+                />
+            )}
 
             <div className="pd-content">
                 <PropertyMainInfo

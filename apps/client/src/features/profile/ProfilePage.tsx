@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { TextField } from '@/components/ui/TextField/TextField';
 import { useAuth } from '@/context/AuthContext';
 import { PropertyCard } from '@/features/properties/components/PropertyCard/PropertyCard';
-import { getMyProperties, type Property } from '@/features/properties/property.service';
+import { getMyProperties, getMyComments, type Property, type MyComment } from '@/features/properties/property.service';
 import api from '@/services/api';
 import { getUserDisplayName, getUserInitial } from '@/utils/user';
 import { Building2, CheckCircle, Home, MessageSquareText, Pencil, Save, Star, User, X } from 'lucide-react';
@@ -38,6 +38,10 @@ export const ProfilePage: React.FC = () => {
     const [properties, setProperties] = useState<Property[]>([]);
     const [isLoadingListings, setIsLoadingListings] = useState(true);
 
+    // Reviews state
+    const [userReviews, setUserReviews] = useState<MyComment[]>([]);
+    const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+
     // Sync form when user changes
     useEffect(() => {
         if (user) {
@@ -62,6 +66,17 @@ export const ProfilePage: React.FC = () => {
     useEffect(() => {
         if (user) loadListings();
     }, [user, loadListings]);
+
+    // Load reviews when reviews tab is active
+    useEffect(() => {
+        if (activeTab === 'reviews' && user) {
+            setIsLoadingReviews(true);
+            getMyComments()
+                .then(setUserReviews)
+                .catch(() => setUserReviews([]))
+                .finally(() => setIsLoadingReviews(false));
+        }
+    }, [activeTab, user]);
 
     // Save profile
     const handleSave = async () => {
@@ -131,9 +146,7 @@ export const ProfilePage: React.FC = () => {
     const displayName = getUserDisplayName(user);
     const initial = getUserInitial(user);
 
-    // Collect reviews the user left (from their own properties' comments with matching username)
-    // For now we'll show a placeholder — in production we'd have a dedicated endpoint
-    const userReviews: { propertyTitle: string; text: string; rating: number; date: string }[] = [];
+    // userReviews is loaded dynamically when the reviews tab opens (see useEffect above)
 
     return (
         <div className="pp">
@@ -299,13 +312,22 @@ export const ProfilePage: React.FC = () => {
                             <h2 className="pp-section-title">ביקורות שכתבתי</h2>
                         </div>
 
-                        {userReviews.length > 0 ? (
+                        {isLoadingReviews ? (
+                            <Spinner size={32} message="טוען ביקורות..." />
+                        ) : userReviews.length > 0 ? (
                             <div className="pp-review-list">
-                                {userReviews.map((review, i) => (
-                                    <div key={i} className="pp-review-item">
+                                {userReviews.map((review) => (
+                                    <div
+                                        key={review._id}
+                                        className="pp-review-item"
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => navigate(`/property/${review.propertyId}`)}
+                                    >
                                         <div className="pp-review-item-top">
                                             <strong>{review.propertyTitle}</strong>
-                                            <span className="pp-review-date">{review.date}</span>
+                                            <span className="pp-review-date">
+                                                {new Date(review.createdAt).toLocaleDateString('he-IL')}
+                                            </span>
                                         </div>
                                         <div className="pp-review-stars">
                                             {Array.from({ length: 5 }).map((_, s) => (

@@ -14,14 +14,5 @@ export const EMPTY_FILTERS: SearchFilters = {
     guests: 0,
 };
 
-export const LOCATIONS = [
-    'Tel Aviv',
-    'Jerusalem',
-    'Haifa',
-    'Eilat',
-    'Rishon LeZion',
-    'Netanya',
-    'Ashdod',
-];
 
 export type ActivePanel = 'location' | 'checkin' | 'checkout' | 'guests' | null;
