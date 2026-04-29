@@ -7,13 +7,15 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "serve": "node serve.mjs"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.8",
     "@types/leaflet": "^1.9.21",
     "axios": "^1.13.6",
     "clsx": "^2.1.1",
+    "express": "^4.21.2",
     "framer-motion": "^12.34.4",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.576.0",
