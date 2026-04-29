@@ -138,9 +138,89 @@ export class PropertyService implements OnModuleInit {
         return property.save();
     }
 
+    /**
+     * Semantic location groups — maps a descriptive keyword returned by the AI
+     * to the list of relevant Hebrew city names stored in the DB.
+     * Edge-cases covered: near the sea, north, south/desert, centre, dead sea, etc.
+     */
+    private readonly LOCATION_GROUPS: Record<string, string[]> = {
+        // ── Coastal / seaside ──
+        'ליד הים':    ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים', 'הרצליה'],
+        'חוף הים':    ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים', 'הרצליה'],
+        'חוף':        ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים'],
+        'seaside':    ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים'],
+        'beach':      ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים'],
+        // ── North ──
+        'הצפון':   ['חיפה', 'צפת', 'טבריה', 'נהריה', 'עכו', 'ראש פינה', 'קצרין'],
+        'צפון':    ['חיפה', 'צפת', 'טבריה', 'נהריה', 'עכו', 'ראש פינה', 'קצרין'],
+        'גליל':    ['צפת', 'טבריה', 'ראש פינה', 'קצרין', 'נהריה'],
+        'הגליל':   ['צפת', 'טבריה', 'ראש פינה', 'קצרין', 'נהריה'],
+        'north':   ['חיפה', 'צפת', 'טבריה', 'נהריה', 'עכו', 'ראש פינה'],
+        // ── South / Desert ──
+        'הדרום':      ['באר שבע', 'מצפה רמון', 'אילת', 'דימונה'],
+        'דרום':       ['באר שבע', 'מצפה רמון', 'אילת', 'דימונה'],
+        'מדבר':       ['מצפה רמון', 'אילת', 'באר שבע'],
+        'הנגב':       ['באר שבע', 'מצפה רמון', 'דימונה'],
+        'נגב':        ['באר שבע', 'מצפה רמון', 'דימונה'],
+        'south':      ['באר שבע', 'מצפה רמון', 'אילת'],
+        'desert':     ['מצפה רמון', 'אילת', 'באר שבע'],
+        // ── Dead Sea area ──
+        'ים המלח':    ['ים המלח', 'עין גדי', 'עין בוקק', 'ערד'],
+        'dead sea':   ['ים המלח', 'עין גדי', 'עין בוקק', 'ערד'],
+        // ── Centre ──
+        'מרכז':       ['תל אביב', 'רמת גן', 'פתח תקווה', 'הרצליה', 'רחובות', 'ראשון לציון', 'גבעתיים'],
+        'center':     ['תל אביב', 'רמת גן', 'פתח תקווה', 'הרצליה', 'רחובות', 'ראשון לציון'],
+        'centre':     ['תל אביב', 'רמת גן', 'פתח תקווה', 'הרצליה', 'רחובות', 'ראשון לציון'],
+        // ── Mountains / high altitude ──
+        'הרים':    ['ירושלים', 'צפת', 'ראש פינה'],
+        'mountains': ['ירושלים', 'צפת', 'ראש פינה'],
+    };
+
+    /**
+     * Normalise a location string coming from Nominatim or the AI:
+     *  - Handles English city names  (AI returns "Tel Aviv")
+     *  - Handles Hebrew Nominatim variants  ("תל אביב-יפו" → "תל אביב")
+     * Returns the canonical Hebrew name used in the DB, or the original if unknown.
+     */
+    private normalizeLocation(location: string): string {
+        const CITY_MAP: Record<string, string> = {
+            // English → Hebrew
+            'tel aviv': 'תל אביב', 'tel-aviv': 'תל אביב',
+            'tel aviv-yafo': 'תל אביב', 'tel aviv yafo': 'תל אביב', 'tel aviv jaffa': 'תל אביב',
+            'jerusalem': 'ירושלים', 'yerushalayim': 'ירושלים',
+            'haifa': 'חיפה',
+            'eilat': 'אילת',
+            'netanya': 'נתניה',
+            'rishon lezion': 'ראשון לציון', 'rishon le-zion': 'ראשון לציון', 'rishon leẕiyyon': 'ראשון לציון',
+            'ashdod': 'אשדוד',
+            'beer sheva': 'באר שבע', 'beer-sheva': 'באר שבע', "be'er sheva": 'באר שבע',
+            'rosh pinna': 'ראש פינה', 'rosh ha-niqra': 'ראש הנקרה',
+            'mitzpe ramon': 'מצפה רמון', 'mizpe ramon': 'מצפה רמון',
+            'safed': 'צפת', 'tzfat': 'צפת', 'zefat': 'צפת',
+            'nazareth': 'נצרת',
+            'tiberias': 'טבריה',
+            'akko': 'עכו', 'acre': 'עכו',
+            'bat yam': 'בת ים',
+            'petah tikva': 'פתח תקווה', 'petach tikva': 'פתח תקווה',
+            'bnei brak': 'בני ברק',
+            'holon': 'חולון',
+            'ramat gan': 'רמת גן',
+            'givatayim': 'גבעתיים',
+            // Hebrew Nominatim variants → canonical DB value
+            'תל אביב-יפו': 'תל אביב', 'תל אביב יפו': 'תל אביב',
+            'ירושלים': 'ירושלים', 'ירושלים (יְרוּשָׁלַיִם)': 'ירושלים',
+            'באר שבע': 'באר שבע', 'בְּאֵר שֶׁבַע': 'באר שבע',
+        };
+
+        const key = location.trim().toLowerCase();
+        return CITY_MAP[key] ?? location;
+    }
+
     async findAll(page: number = 1, limit: number = 10, ownerId?: string, currentUserId?: string, search?: {
         q?: string;
         location?: string;
+        locations?: string[];       // multiple location groups → intersected
+        excludeLocation?: string;   // negative location filter ("except X")
         checkIn?: string;
         checkOut?: string;
         guests?: number;
@@ -157,9 +237,54 @@ export class PropertyService implements OnModuleInit {
             pipeline.push({ $match: { ownerId } });
         }
 
-        // Search filters
-        if (search?.location) {
-            pipeline.push({ $match: { 'location.city': { $regex: search.location, $options: 'i' } } });
+        // ── Location search ────────────────────────────────────────────────
+        // Priority: locations[] (multi-group intersection) > location (single)
+        // Helper: resolve a raw location string to a Set of DB city names
+        const resolveCities = (raw: string): Set<string> => {
+            const trimmed = raw.trim();
+            const grp = this.LOCATION_GROUPS[trimmed] ?? this.LOCATION_GROUPS[trimmed.toLowerCase()];
+            if (grp && grp.length > 0) return new Set(grp);
+            return new Set([this.normalizeLocation(trimmed)]);
+        };
+
+        if (search?.locations && search.locations.length > 0) {
+            // Multi-location: intersect all resolved city sets
+            const sets = search.locations.map(l => resolveCities(l));
+            let result = sets[0];
+            for (let i = 1; i < sets.length; i++) {
+                result = new Set([...result].filter(c => sets[i].has(c)));
+            }
+            // If intersection is empty (contradictory filters), fall back to union
+            const finalCities = result.size > 0
+                ? [...result]
+                : [...new Set(sets.flatMap(s => [...s]))];
+            pipeline.push({ $match: { 'location.city': { $in: finalCities } } });
+
+        } else if (search?.location) {
+            // Single location:
+            //  1. Semantic group (e.g. "ליד הים") → $in list of relevant cities
+            //  2. Specific city name → exact regex match only (no bounding box —
+            //     bounding-box was too broad and returned neighbouring cities)
+            const raw = search.location.trim();
+            const groupCities = this.LOCATION_GROUPS[raw] ?? this.LOCATION_GROUPS[raw.toLowerCase()];
+            if (groupCities && groupCities.length > 0) {
+                pipeline.push({ $match: { 'location.city': { $in: groupCities } } });
+            } else {
+                const normalized = this.normalizeLocation(raw);
+                pipeline.push({ $match: { 'location.city': { $regex: normalized, $options: 'i' } } });
+            }
+        }
+
+        // Negative location filter (applies regardless of location/locations)
+        if (search?.excludeLocation) {
+            const raw = search.excludeLocation.trim();
+            const excludeCities = this.LOCATION_GROUPS[raw] ?? this.LOCATION_GROUPS[raw.toLowerCase()];
+            if (excludeCities && excludeCities.length > 0) {
+                pipeline.push({ $match: { 'location.city': { $nin: excludeCities } } });
+            } else {
+                const normalized = this.normalizeLocation(raw);
+                pipeline.push({ $match: { 'location.city': { $not: { $regex: `^${normalized}$`, $options: 'i' } } } });
+            }
         }
 
         if (search?.guests) {

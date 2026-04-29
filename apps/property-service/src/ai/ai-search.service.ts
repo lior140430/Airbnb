@@ -4,6 +4,8 @@ import { ConfigService } from '@nestjs/config';
 
 export interface ParsedSearchFilters {
     location?: string;
+    locations?: string[];      // multiple overlapping geographic constraints → will be intersected
+    excludeLocation?: string;  // negative filter: "everywhere except X"
     guests?: number;
     minPrice?: number;
     maxPrice?: number;
@@ -12,21 +14,64 @@ export interface ParsedSearchFilters {
     keywords?: string;
 }
 
-const SYSTEM_PROMPT = `You are a real estate search assistant. The user will provide a natural language search query (may be in Hebrew or English) about rental properties.
+const SYSTEM_PROMPT = `You are a real estate search assistant for Israel. The user will provide a natural language query (Hebrew or English) about rental properties.
 
-Extract structured search filters from the query and return a JSON object with these fields (only include fields that are clearly mentioned):
-- location: city name in English (e.g. "Tel Aviv", "Jerusalem", "Haifa", "Eilat", "Netanya")  
+Extract structured search filters and return a JSON object with these fields (only include what is clearly implied):
+
+- location: a Hebrew string — either a specific city name OR one semantic group keyword (use for single geographic constraint)
+- locations: array of Hebrew semantic group keywords — use ONLY when the query combines TWO or more overlapping geographic constraints (e.g., "במרכז ליד הים" → ["מרכז","ליד הים"]). Do NOT use together with "location".
+- excludeLocation: a Hebrew string — city name or semantic group keyword to EXCLUDE (for "מלבד X" / "חוץ מ-X" / "except X" patterns)
 - guests: number of guests (integer)
 - minPrice: minimum price per night in ILS (integer)
 - maxPrice: maximum price per night in ILS (integer)
-- bedrooms: number of bedrooms (integer)
-- amenities: array of amenity keys from: ["wifi", "kitchen", "washer", "airConditioning", "tv", "parking", "pool", "petFriendly", "gym", "balcony"]
-- keywords: remaining search terms to match against title/description (string, keep relevant words, translate to English if needed)
+- bedrooms: minimum number of bedrooms (integer)
+- amenities: array from ["wifi","kitchen","washer","airConditioning","tv","parking","pool","petFriendly","gym","balcony"]
+- keywords: remaining search terms for title/description matching (Hebrew or English string)
 
-Hebrew city name mappings: תל אביב→Tel Aviv, ירושלים→Jerusalem, חיפה→Haifa, אילת→Eilat, נתניה→Netanya, ראשון לציון→Rishon LeZion, אשדוד→Ashdod
+── Specific city names (always use the exact Hebrew form) ──
+  Tel Aviv / תל אביב → "תל אביב"
+  Jerusalem / ירושלים → "ירושלים"
+  Haifa / חיפה → "חיפה"
+  Eilat / אילת → "אילת"
+  Netanya / נתניה → "נתניה"
+  Beer Sheva / באר שבע → "באר שבע"
+  Rishon LeZion / ראשון לציון → "ראשון לציון"
+  Ashdod / אשדוד → "אשדוד"
+  Safed/Tzfat / צפת → "צפת"
+  Tiberias / טבריה → "טבריה"
+  Mitzpe Ramon / מצפה רמון → "מצפה רמון"
+  Rosh Pinna / ראש פינה → "ראש פינה"
 
-Return ONLY valid JSON, no markdown, no explanation.
-Example output: {"location":"Tel Aviv","guests":3,"amenities":["pool","wifi"],"keywords":"quiet apartment"}`;
+── Semantic group keywords (use when the query is geographic/descriptive, not a specific city) ──
+  "near the sea" / "ליד הים" / "beach" / "seaside" / "חוף" → "ליד הים"
+  "north" / "הצפון" / "galilee" / "גליל" → "הצפון"
+  "south" / "הדרום" / "negev" / "הנגב" → "הדרום"
+  "desert" / "מדבר" → "מדבר"
+  "dead sea" / "ים המלח" → "ים המלח"
+  "center" / "centre" / "מרכז" → "מרכז"
+  "mountains" / "הרים" → "הרים"
+
+── Rules ──
+1. Use "location" for a single geographic filter (one city or one group).
+2. Use "locations" (array) only when the query explicitly combines two or more geographic areas (e.g., "מרכז ליד הים", "north near the sea").
+3. Use "excludeLocation" for negations: "מלבד תל אביב", "חוץ מהדרום", "except Jerusalem", "not in the north".
+4. "excludeLocation" can coexist with "location" or "locations".
+5. If a query is simply a city name — return it as "location", not "excludeLocation".
+
+Examples:
+  "דירה ליד הים" → {"location":"ליד הים"}
+  "חופשה בצפון" → {"location":"הצפון"}
+  "וילה עם בריכה באילת" → {"location":"אילת","amenities":["pool"]}
+  "שקט ליד טבע בגליל" → {"location":"הצפון","keywords":"שקט טבע"}
+  "דירה זולה במרכז" → {"location":"מרכז","maxPrice":400}
+  "דירה במרכז ליד הים" → {"locations":["מרכז","ליד הים"]}
+  "דירה עם מזגן בצפון" → {"location":"הצפון","amenities":["airConditioning"]}
+  "כל מקום מלבד תל אביב" → {"excludeLocation":"תל אביב"}
+  "חוץ מהדרום, דירה עם בריכה" → {"excludeLocation":"הדרום","amenities":["pool"]}
+  "בצפון ליד הים עם חנייה" → {"locations":["הצפון","ליד הים"],"amenities":["parking"]}
+  "2 חדרים בירושלים חוץ מהמרכז" → {"location":"ירושלים","bedrooms":2}
+
+Return ONLY valid JSON, no markdown, no explanation.`;
 
 @Injectable()
 export class AiSearchService {

@@ -24,7 +24,9 @@ export function addAuthInterceptors(instance: AxiosInstance) {
     (response) => response,
     async (error) => {
       const originalRequest = error.config;
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      // Never retry the refresh endpoint itself — that would create an infinite loop
+      const isRefreshCall = originalRequest?.url?.includes('/auth/refresh');
+      if (error.response?.status === 401 && !originalRequest._retry && !isRefreshCall) {
         originalRequest._retry = true;
         try {
           const { data } = await api.post('/auth/refresh');

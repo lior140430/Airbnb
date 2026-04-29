@@ -58,7 +58,11 @@ export const PropertyFeed: React.FC<PropertyFeedProps> = ({ onPropertiesLoaded }
                     hasMoreRef.current = data.length === 20;
                 }
             })
-            .catch((err) => console.error('Failed to load properties', err))
+            .catch((err) => {
+                console.error('Failed to load properties', err);
+                hasMoreRef.current = false; // stop IntersectionObserver retrying on error
+                if (currentPage === 1) setProperties([]);
+            })
             .finally(() => {
                 loadingRef.current = false;
                 setLoading(false);
@@ -102,7 +106,13 @@ export const PropertyFeed: React.FC<PropertyFeedProps> = ({ onPropertiesLoaded }
                 ))}
             </div>
             {!loading && properties.length === 0 && (
-                <div className="feed-loader">לא נמצאו נכסים.</div>
+                <div className="feed-empty">
+                    <span style={{ fontSize: '2.5rem' }}>🏠</span>
+                    <p style={{ fontWeight: 600, margin: '12px 0 4px' }}>לא נמצאו נכסים</p>
+                    <p style={{ color: 'var(--text-muted, #888)', fontSize: '14px' }}>
+                        נסו לשנות את פרמטרי החיפוש
+                    </p>
+                </div>
             )}
             <div ref={sentinelRef} style={{ height: 1 }} />
         </>

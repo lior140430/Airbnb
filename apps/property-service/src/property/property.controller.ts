@@ -28,7 +28,7 @@ const multerOptions = {
             cb(new Error('Only image files (jpeg, png, webp) are allowed'), false);
         }
     },
-    limits: { fileSize: 5 * 1024 * 1024 },
+    limits: { fileSize: 25 * 1024 * 1024 },
 };
 
 @ApiTags('properties')
@@ -94,6 +94,8 @@ export class PropertyController {
             currentUserId,
             {
                 location,
+                locations: parsed.locations,
+                excludeLocation: parsed.excludeLocation,
                 checkIn,
                 checkOut,
                 guests,
