@@ -13,10 +13,20 @@ build/
 .env
 .env.local
 .env.*.local
+.envprod
+.env.production
+.env.production.local
+
+# SSL certificates - keep outside repo
+*.pem
+*.crt
+*.key
+*.csr
 
 # IDE
 .vscode/
 .idea/
+.claude/
 *.swp
 *.swo
 *~
