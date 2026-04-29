@@ -34,6 +34,7 @@ describe('AuthController', () => {
             signUp: jest.fn(),
             logIn: jest.fn(),
             logout: jest.fn(),
+            refreshTokens: jest.fn(),
         };
 
         tokenService = {
@@ -132,10 +133,7 @@ describe('AuthController', () => {
 
         it('returns new accessToken when refresh token is valid', async () => {
             (tokenService.verifyToken as jest.Mock).mockResolvedValue({ sub: 'user123', email: 'dana@test.com' });
-            const user = { ...mockUser, currentHashedRefreshToken: 'hashed' };
-            (userService.findById as jest.Mock).mockResolvedValue(user);
-            (tokenService.updateUserRefreshToken as jest.Mock).mockResolvedValue(undefined);
-            (tokenService.generateTokens as jest.Mock).mockResolvedValue({
+            (authService.refreshTokens as jest.Mock).mockResolvedValue({
                 accessToken: 'new-access',
                 refreshToken: 'new-refresh',
             });
@@ -144,6 +142,7 @@ describe('AuthController', () => {
             const res = mockResponse();
             const result = await controller.refresh(req, res);
 
+            expect(authService.refreshTokens).toHaveBeenCalledWith('user123', 'valid-refresh-token');
             expect(result.accessToken).toBe('new-access');
             expect(res.cookie).toHaveBeenCalledWith(
                 'Refresh',
