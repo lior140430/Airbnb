@@ -139,6 +139,44 @@ export class PropertyService implements OnModuleInit {
     }
 
     /**
+     * Semantic location groups — maps a descriptive keyword returned by the AI
+     * to the list of relevant Hebrew city names stored in the DB.
+     * Edge-cases covered: near the sea, north, south/desert, centre, dead sea, etc.
+     */
+    private readonly LOCATION_GROUPS: Record<string, string[]> = {
+        // ── Coastal / seaside ──
+        'ליד הים':    ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים', 'הרצליה'],
+        'חוף הים':    ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים', 'הרצליה'],
+        'חוף':        ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים'],
+        'seaside':    ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים'],
+        'beach':      ['תל אביב', 'חיפה', 'נתניה', 'אשדוד', 'אילת', 'עכו', 'נהריה', 'בת ים'],
+        // ── North ──
+        'הצפון':   ['חיפה', 'צפת', 'טבריה', 'נהריה', 'עכו', 'ראש פינה', 'קצרין'],
+        'צפון':    ['חיפה', 'צפת', 'טבריה', 'נהריה', 'עכו', 'ראש פינה', 'קצרין'],
+        'גליל':    ['צפת', 'טבריה', 'ראש פינה', 'קצרין', 'נהריה'],
+        'הגליל':   ['צפת', 'טבריה', 'ראש פינה', 'קצרין', 'נהריה'],
+        'north':   ['חיפה', 'צפת', 'טבריה', 'נהריה', 'עכו', 'ראש פינה'],
+        // ── South / Desert ──
+        'הדרום':      ['באר שבע', 'מצפה רמון', 'אילת', 'דימונה'],
+        'דרום':       ['באר שבע', 'מצפה רמון', 'אילת', 'דימונה'],
+        'מדבר':       ['מצפה רמון', 'אילת', 'באר שבע'],
+        'הנגב':       ['באר שבע', 'מצפה רמון', 'דימונה'],
+        'נגב':        ['באר שבע', 'מצפה רמון', 'דימונה'],
+        'south':      ['באר שבע', 'מצפה רמון', 'אילת'],
+        'desert':     ['מצפה רמון', 'אילת', 'באר שבע'],
+        // ── Dead Sea area ──
+        'ים המלח':    ['ים המלח', 'עין גדי', 'עין בוקק', 'ערד'],
+        'dead sea':   ['ים המלח', 'עין גדי', 'עין בוקק', 'ערד'],
+        // ── Centre ──
+        'מרכז':       ['תל אביב', 'רמת גן', 'פתח תקווה', 'הרצליה', 'רחובות', 'ראשון לציון', 'גבעתיים'],
+        'center':     ['תל אביב', 'רמת גן', 'פתח תקווה', 'הרצליה', 'רחובות', 'ראשון לציון'],
+        'centre':     ['תל אביב', 'רמת גן', 'פתח תקווה', 'הרצליה', 'רחובות', 'ראשון לציון'],
+        // ── Mountains / high altitude ──
+        'הרים':    ['ירושלים', 'צפת', 'ראש פינה'],
+        'mountains': ['ירושלים', 'צפת', 'ראש פינה'],
+    };
+
+    /**
      * Normalise a location string coming from Nominatim or the AI:
      *  - Handles English city names  (AI returns "Tel Aviv")
      *  - Handles Hebrew Nominatim variants  ("תל אביב-יפו" → "תל אביב")
@@ -197,29 +235,37 @@ export class PropertyService implements OnModuleInit {
             pipeline.push({ $match: { ownerId } });
         }
 
-        // Location search — normalise the input then try text match;
-        // if geocoding returns coords, also accept properties within ~40 km radius.
+        // Location search — three strategies in priority order:
+        //  1. Semantic group (e.g. "ליד הים" → coastal cities list)
+        //  2. Exact/normalised city name + geographic bounding-box fallback
         if (search?.location) {
-            const normalized = this.normalizeLocation(search.location);
+            const raw = search.location.trim();
 
-            // Try to geocode so we can do a geographic bounding-box match in parallel
-            const coords = await this.geocodingService.geocode(normalized).catch(() => null);
-
-            if (coords) {
-                const delta = 0.36; // ≈ 40 km in degrees lat/lng
-                pipeline.push({
-                    $match: {
-                        $or: [
-                            { 'location.city': { $regex: normalized, $options: 'i' } },
-                            {
-                                'coordinates.lat': { $gte: coords.lat - delta, $lte: coords.lat + delta },
-                                'coordinates.lng': { $gte: coords.lng - delta, $lte: coords.lng + delta },
-                            },
-                        ],
-                    },
-                });
+            // Strategy 1 — semantic group keyword
+            const groupCities = this.LOCATION_GROUPS[raw] ?? this.LOCATION_GROUPS[raw.toLowerCase()];
+            if (groupCities && groupCities.length > 0) {
+                pipeline.push({ $match: { 'location.city': { $in: groupCities } } });
             } else {
-                pipeline.push({ $match: { 'location.city': { $regex: normalized, $options: 'i' } } });
+                // Strategy 2 — normalise name then try city regex + bounding box
+                const normalized = this.normalizeLocation(raw);
+                const coords = await this.geocodingService.geocode(normalized).catch(() => null);
+
+                if (coords) {
+                    const delta = 0.36; // ≈ 40 km in degrees lat/lng
+                    pipeline.push({
+                        $match: {
+                            $or: [
+                                { 'location.city': { $regex: normalized, $options: 'i' } },
+                                {
+                                    'coordinates.lat': { $gte: coords.lat - delta, $lte: coords.lat + delta },
+                                    'coordinates.lng': { $gte: coords.lng - delta, $lte: coords.lng + delta },
+                                },
+                            ],
+                        },
+                    });
+                } else {
+                    pipeline.push({ $match: { 'location.city': { $regex: normalized, $options: 'i' } } });
+                }
             }
         }
 
