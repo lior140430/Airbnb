@@ -38,6 +38,7 @@ describe('PropertyService', () => {
             countDocuments: jest.fn().mockResolvedValue(50),
             aggregate: jest.fn(),
             findOne: jest.fn(),
+            find: jest.fn(),
             findById: jest.fn(),
             findByIdAndUpdate: jest.fn(),
             findByIdAndDelete: jest.fn(),
@@ -266,6 +267,54 @@ describe('PropertyService', () => {
             const result = await service.getComments(validObjectId);
             expect(commentModel.find).toHaveBeenCalled();
             expect(result).toEqual(comments);
+        });
+    });
+
+    // ─── getMyComments ───
+    describe('getMyComments', () => {
+        it('returns empty array when user has no comments', async () => {
+            commentModel.find.mockReturnValue({
+                sort: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue([]) }),
+            });
+
+            const result = await service.getMyComments('user123');
+            expect(result).toEqual([]);
+        });
+
+        it('returns comments enriched with property title and image', async () => {
+            const propId = new Types.ObjectId();
+            const mockComments = [
+                { _id: 'c1', text: 'Great!', rating: 5, userId: 'user123', propertyId: propId },
+            ];
+            const mockProperties = [
+                { _id: propId, title: 'Sunny Apartment', images: ['img1.jpg'] },
+            ];
+
+            commentModel.find.mockReturnValue({
+                sort: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(mockComments) }),
+            });
+            propertyModel.find.mockReturnValue({ lean: jest.fn().mockResolvedValue(mockProperties) });
+
+            const result = await service.getMyComments('user123');
+            expect(result).toHaveLength(1);
+            expect(result[0].propertyTitle).toBe('Sunny Apartment');
+            expect(result[0].propertyImage).toBe('img1.jpg');
+        });
+
+        it('sets fallback title when property not found', async () => {
+            const propId = new Types.ObjectId();
+            const mockComments = [
+                { _id: 'c1', text: 'OK', rating: 3, userId: 'user123', propertyId: propId },
+            ];
+
+            commentModel.find.mockReturnValue({
+                sort: jest.fn().mockReturnValue({ lean: jest.fn().mockResolvedValue(mockComments) }),
+            });
+            propertyModel.find.mockReturnValue({ lean: jest.fn().mockResolvedValue([]) });
+
+            const result = await service.getMyComments('user123');
+            expect(result[0].propertyTitle).toBe('נכס לא ידוע');
+            expect(result[0].propertyImage).toBeNull();
         });
     });
 });

@@ -432,4 +432,28 @@ export class PropertyService implements OnModuleInit {
         if (!Types.ObjectId.isValid(propertyId)) throw new NotFoundException('Invalid Property ID');
         return this.commentModel.find({ propertyId: new Types.ObjectId(propertyId) }).sort({ createdAt: -1 });
     }
+
+    async getMyComments(userId: string): Promise<any[]> {
+        const comments = await this.commentModel
+            .find({ userId })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        if (!comments.length) return [];
+
+        const propertyIds = [...new Set(comments.map((c) => c.propertyId.toString()))];
+        const properties = await this.propertyModel
+            .find({ _id: { $in: propertyIds } }, { title: 1, images: 1 })
+            .lean();
+
+        const propertyMap = Object.fromEntries(
+            properties.map((p) => [p._id.toString(), p]),
+        );
+
+        return comments.map((c) => ({
+            ...c,
+            propertyTitle: propertyMap[c.propertyId.toString()]?.title ?? 'נכס לא ידוע',
+            propertyImage: propertyMap[c.propertyId.toString()]?.images?.[0] ?? null,
+        }));
+    }
 }

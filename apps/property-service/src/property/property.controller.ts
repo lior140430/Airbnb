@@ -156,6 +156,14 @@ export class PropertyController {
         return this.propertyService.remove(id, req.user._id);
     }
 
+    @Get('comments/mine')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiOperation({ summary: 'Get all comments written by the current user' })
+    @ApiResponse({ status: 200, description: 'Return comments with property info.' })
+    getMyComments(@Req() req) {
+        return this.propertyService.getMyComments(req.user._id);
+    }
+
     @Post(':id/like')
     @UseGuards(AuthGuard('jwt'))
     @ApiOperation({ summary: 'Toggle like for a property' })
