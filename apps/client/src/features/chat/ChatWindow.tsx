@@ -2,6 +2,8 @@ import { Avatar } from '@/components/ui/Avatar/Avatar';
 import { useAuth } from '@/context/AuthContext';
 import { useChatContext } from '@/context/ChatContext';
 import { getUserDisplayName, getUserInitial } from '@/utils/user';
+import { getImageUrl } from '@/utils/image';
+import { formatPrice } from '@/utils/format';
 import { ArrowRight, Send } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChatBubble } from './ChatBubble';
@@ -14,6 +16,7 @@ export const ChatWindow: React.FC = () => {
         messages,
         isTyping,
         usersCache,
+        propertyContext,
         sendMessage,
         markAsRead,
         setActiveConversation,
@@ -109,6 +112,23 @@ export const ChatWindow: React.FC = () => {
                 />
                 <span className="cw-header-name">{displayName}</span>
             </div>
+
+            {/* Property banner — shown when chat was opened from a property page */}
+            {propertyContext && (
+                <div className="cw-property-banner">
+                    {propertyContext.image && (
+                        <img
+                            src={getImageUrl(propertyContext.image)}
+                            alt={propertyContext.title}
+                            className="cw-property-banner-img"
+                        />
+                    )}
+                    <div className="cw-property-banner-info">
+                        <span className="cw-property-banner-title">{propertyContext.title}</span>
+                        <span className="cw-property-banner-price">{formatPrice(propertyContext.price)} ללילה</span>
+                    </div>
+                </div>
+            )}
 
             {/* Messages */}
             <div className="cw-messages">

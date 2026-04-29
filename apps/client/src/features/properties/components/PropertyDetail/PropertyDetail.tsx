@@ -32,7 +32,12 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onRefr
             return;
         }
         if (property.ownerId) {
-            openChatWithUser(property.ownerId);
+            openChatWithUser(property.ownerId, {
+                _id: property._id,
+                title: property.title,
+                price: property.price,
+                image: property.images?.[0],
+            });
         }
     };
 
