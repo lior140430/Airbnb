@@ -72,10 +72,12 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onRefr
                 street={property.location.street}
             />
 
-            <PropertyGallery
-                images={property.images || []}
-                title={property.title}
-            />
+            {(property.images?.length ?? 0) > 0 && (
+                <PropertyGallery
+                    images={property.images}
+                    title={property.title}
+                />
+            )}
 
             <div className="pd-content">
                 <PropertyMainInfo
