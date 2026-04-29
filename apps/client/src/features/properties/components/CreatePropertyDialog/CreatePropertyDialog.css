@@ -34,6 +34,11 @@
     align-items: center;
 }
 
+.create-property-footer .btn {
+    width: auto;
+    padding: 0 28px;
+}
+
 /* ── Step 2: Specs ── */
 .cpd-section-title {
     font-size: 15px;
