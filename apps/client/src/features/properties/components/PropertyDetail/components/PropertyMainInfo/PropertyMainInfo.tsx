@@ -22,7 +22,7 @@ interface PropertyMainInfoProps {
     beds?: number;
     bathrooms?: number;
     amenities?: string[];
-    avgRating?: number | null;
+    avgRating?: string | null;
     commentsCount?: number;
 }
 
@@ -45,7 +45,7 @@ export const PropertyMainInfo: React.FC<PropertyMainInfoProps> = ({
             <div className="pd-highlight" key="rating">
                 <div className="pd-highlight-icon"><Star size={24} /></div>
                 <div>
-                    <div className="pd-highlight-title">דירוג ממוצע {avgRating.toFixed(1)} ★</div>
+                    <div className="pd-highlight-title">דירוג ממוצע {avgRating} ★</div>
                     <div className="pd-highlight-desc">על בסיס {commentsCount} ביקורות אורחים</div>
                 </div>
             </div>
