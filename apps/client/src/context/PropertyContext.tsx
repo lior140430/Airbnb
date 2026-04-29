@@ -14,6 +14,8 @@ interface PropertyContextType {
     triggerRefresh: () => void;
     searchFilters: SearchFilters;
     setSearchFilters: (filters: SearchFilters) => void;
+    isSearching: boolean;
+    setIsSearching: (v: boolean) => void;
 }
 
 const PropertyContext = createContext<PropertyContextType | undefined>(undefined);
@@ -21,6 +23,7 @@ const PropertyContext = createContext<PropertyContextType | undefined>(undefined
 export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [searchFilters, setSearchFiltersState] = useState<SearchFilters>(EMPTY_FILTERS);
+    const [isSearching, setIsSearching] = useState(false);
 
     const triggerRefresh = useCallback(() => {
         setRefreshTrigger(prev => prev + 1);
@@ -33,7 +36,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }, []);
 
     return (
-        <PropertyContext.Provider value={{ refreshTrigger, triggerRefresh, searchFilters, setSearchFilters }}>
+        <PropertyContext.Provider value={{ refreshTrigger, triggerRefresh, searchFilters, setSearchFilters, isSearching, setIsSearching }}>
             {children}
         </PropertyContext.Provider>
     );

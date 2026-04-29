@@ -227,6 +227,16 @@
     flex-shrink: 0;
 }
 
+/* ─── Search loading spinner ─────────────────────────── */
+.search-pill-spinner {
+    animation: pillSpin 0.8s linear infinite;
+}
+
+@keyframes pillSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
 /* Search button */
 .search-submit-btn {
     display: flex;
