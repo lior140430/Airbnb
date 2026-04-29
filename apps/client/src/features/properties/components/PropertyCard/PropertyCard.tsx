@@ -1,7 +1,7 @@
 ﻿import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/utils/format';
 import { getImageUrl, handleImageError } from '@/utils/image';
-import { Heart, MessageCircle, Star } from 'lucide-react';
+import { Heart, MessageCircle, Star, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toggleLike, type Property } from '../../property.service';
@@ -9,13 +9,27 @@ import './PropertyCard.css';
 
 interface PropertyCardProps {
     property: Property;
+    onDelete?: (id: string) => void;
 }
 
-export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {    
+export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onDelete }) => {
     const [isLiked, setIsLiked] = useState(property.isLiked || false);
     const [likesCount, setLikesCount] = useState(property.likesCount || 0);
+    const [deleting, setDeleting] = useState(false);
     const navigate = useNavigate();
     const { isAuthenticated, openAuthDialog } = useAuth();
+
+    const handleDeleteClick = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!window.confirm(`למחוק את "${property.title}"?`)) return;
+        setDeleting(true);
+        try {
+            await onDelete!(property._id);
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     const handleLikeClick = async (e: React.MouseEvent) => {
         e.preventDefault();
@@ -81,6 +95,36 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
                         style={{ pointerEvents: 'none' }}
                     />
                 </button>
+
+                {onDelete && (
+                    <button
+                        className="delete-property-btn"
+                        onClick={handleDeleteClick}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        title="מחק נכס"
+                        disabled={deleting}
+                        style={{
+                            position: 'absolute',
+                            top: '12px',
+                            left: '12px',
+                            background: 'rgba(0,0,0,0.45)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: deleting ? 'not-allowed' : 'pointer',
+                            zIndex: 10,
+                            opacity: deleting ? 0.5 : 1,
+                            transition: 'background 0.2s',
+                        }}
+                    >
+                        <Trash2 size={16} color="#fff" style={{ pointerEvents: 'none' }} />
+                    </button>
+                )}
             </div>
 
             <div className="property-details">
