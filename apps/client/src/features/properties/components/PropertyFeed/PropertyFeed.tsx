@@ -10,7 +10,7 @@ interface PropertyFeedProps {
 }
 
 export const PropertyFeed: React.FC<PropertyFeedProps> = ({ onPropertiesLoaded }) => {
-    const { refreshTrigger, searchFilters } = useProperty();
+    const { refreshTrigger, searchFilters, setIsSearching } = useProperty();
     const [properties, setProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -37,6 +37,7 @@ export const PropertyFeed: React.FC<PropertyFeedProps> = ({ onPropertiesLoaded }
 
         loadingRef.current = true;
         setLoading(true);
+        if (currentPage === 1) setIsSearching(true);
 
         // Only use AI search when there is actual free-text query; otherwise use plain endpoint
         const fetcher = search.query?.trim() ? aiSearch : getProperties;
@@ -61,6 +62,7 @@ export const PropertyFeed: React.FC<PropertyFeedProps> = ({ onPropertiesLoaded }
             .finally(() => {
                 loadingRef.current = false;
                 setLoading(false);
+                if (currentPage === 1) setIsSearching(false);
             });
     };
 

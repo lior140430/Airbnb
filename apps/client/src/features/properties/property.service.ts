@@ -44,6 +44,16 @@ export interface Comment {
     createdAt?: string;
 }
 
+export interface MyComment {
+    _id: string;
+    text: string;
+    rating: number;
+    createdAt: string;
+    propertyId: string;
+    propertyTitle: string;
+    propertyImage: string | null;
+}
+
 export interface PaginatedProperties {
     data: Property[];
 }
@@ -120,5 +130,10 @@ export const getComments = async (id: string) => {
 
 export const getUserProperties = async (userId: string, page: number = 1, limit: number = 10): Promise<Property[]> => {
     const response = await propertyApi.get(`/properties?ownerId=${userId}&page=${page}&limit=${limit}`);
+    return response.data;
+};
+
+export const getMyComments = async (): Promise<MyComment[]> => {
+    const response = await propertyApi.get('/properties/comments/mine');
     return response.data;
 };

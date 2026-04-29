@@ -1,4 +1,4 @@
-import { Bath, Bed, CalendarX2, Car, Check, Dumbbell, KeyRound, MapPin, PawPrint, Sofa, Thermometer, Trees, Users, Utensils, WashingMachine, Waves, Wifi } from 'lucide-react';
+import { Bath, Bed, Car, Check, Dumbbell, PawPrint, Sofa, Star, Thermometer, Trees, Users, Utensils, WashingMachine, Waves, Wifi } from 'lucide-react';
 import React from 'react';
 
 const AMENITY_CONFIG: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -22,6 +22,8 @@ interface PropertyMainInfoProps {
     beds?: number;
     bathrooms?: number;
     amenities?: string[];
+    avgRating?: string | null;
+    commentsCount?: number;
 }
 
 export const PropertyMainInfo: React.FC<PropertyMainInfoProps> = ({
@@ -32,7 +34,60 @@ export const PropertyMainInfo: React.FC<PropertyMainInfoProps> = ({
     beds = 1,
     bathrooms = 1,
     amenities = [],
+    avgRating,
+    commentsCount = 0,
 }) => {
+    // Build dynamic highlights only from real data
+    const highlights: React.ReactNode[] = [];
+
+    if (avgRating && commentsCount > 0) {
+        highlights.push(
+            <div className="pd-highlight" key="rating">
+                <div className="pd-highlight-icon"><Star size={24} /></div>
+                <div>
+                    <div className="pd-highlight-title">דירוג ממוצע {avgRating} ★</div>
+                    <div className="pd-highlight-desc">על בסיס {commentsCount} ביקורות אורחים</div>
+                </div>
+            </div>
+        );
+    }
+
+    if (amenities.includes('wifi')) {
+        highlights.push(
+            <div className="pd-highlight" key="wifi">
+                <div className="pd-highlight-icon"><Wifi size={24} /></div>
+                <div>
+                    <div className="pd-highlight-title">Wi-Fi מהיר</div>
+                    <div className="pd-highlight-desc">גלישה מהירה בכל רחבי הנכס</div>
+                </div>
+            </div>
+        );
+    }
+
+    if (amenities.includes('parking')) {
+        highlights.push(
+            <div className="pd-highlight" key="parking">
+                <div className="pd-highlight-icon"><Car size={24} /></div>
+                <div>
+                    <div className="pd-highlight-title">חנייה חינם</div>
+                    <div className="pd-highlight-desc">חנייה צמודה כלולה בהזמנה</div>
+                </div>
+            </div>
+        );
+    }
+
+    if (amenities.includes('pool')) {
+        highlights.push(
+            <div className="pd-highlight" key="pool">
+                <div className="pd-highlight-icon"><Waves size={24} /></div>
+                <div>
+                    <div className="pd-highlight-title">בריכה פרטית</div>
+                    <div className="pd-highlight-desc">שחייה ורגיעה בנכס</div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="pd-main">
             {/* Host row */}
@@ -50,32 +105,15 @@ export const PropertyMainInfo: React.FC<PropertyMainInfoProps> = ({
 
             <hr className="pd-divider" />
 
-            {/* Highlights */}
-            <div className="pd-highlights">
-                <div className="pd-highlight">
-                    <div className="pd-highlight-icon"><KeyRound size={24} /></div>
-                    <div>
-                        <div className="pd-highlight-title">צ׳ק-אין עצמי</div>
-                        <div className="pd-highlight-desc">הכנסו בעזרת כספת למפתחות</div>
+            {/* Highlights — shown only when real data exists */}
+            {highlights.length > 0 && (
+                <>
+                    <div className="pd-highlights">
+                        {highlights}
                     </div>
-                </div>
-                <div className="pd-highlight">
-                    <div className="pd-highlight-icon"><MapPin size={24} /></div>
-                    <div>
-                        <div className="pd-highlight-title">מיקום מעולה</div>
-                        <div className="pd-highlight-desc">90% מהאורחים דירגו את המיקום עם 5 כוכבים</div>
-                    </div>
-                </div>
-                <div className="pd-highlight">
-                    <div className="pd-highlight-icon"><CalendarX2 size={24} /></div>
-                    <div>
-                        <div className="pd-highlight-title">ביטול חינם</div>
-                        <div className="pd-highlight-desc">ביטול חינם תוך 48 שעות מההזמנה</div>
-                    </div>
-                </div>
-            </div>
-
-            <hr className="pd-divider" />
+                    <hr className="pd-divider" />
+                </>
+            )}
 
             {/* Stats strip */}
             <div className="pd-stats-strip">
@@ -119,4 +157,3 @@ export const PropertyMainInfo: React.FC<PropertyMainInfoProps> = ({
         </div>
     );
 };
-

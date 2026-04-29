@@ -168,3 +168,44 @@
         font-size: 16px;
     }
 }
+
+/* Property banner — shown when chat opened from property page */
+.cw-property-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--bg-light, #f7f7f7);
+    border-bottom: 1px solid var(--border-default, #ddd);
+    flex-shrink: 0;
+    direction: rtl;
+}
+
+.cw-property-banner-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.cw-property-banner-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
+}
+
+.cw-property-banner-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cw-property-banner-price {
+    font-size: 12px;
+    color: var(--text-muted);
+}

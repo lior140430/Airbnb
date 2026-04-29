@@ -32,6 +32,13 @@ export interface ChatUser {
     picture?: string;
 }
 
+export interface PropertyChatContext {
+    _id: string;
+    title: string;
+    price: number;
+    image?: string;
+}
+
 interface ChatContextType {
     conversations: Conversation[];
     activeConversation: string | null;
@@ -40,6 +47,7 @@ interface ChatContextType {
     isTyping: boolean;
     isChatOpen: boolean;
     usersCache: Record<string, ChatUser>;
+    propertyContext: PropertyChatContext | null;
     toggleChat: () => void;
     setIsChatOpen: (open: boolean) => void;
     sendMessage: (receiverId: string, text: string) => void;
@@ -48,7 +56,7 @@ interface ChatContextType {
     startTyping: (receiverId: string) => void;
     stopTyping: (receiverId: string) => void;
     fetchUser: (userId: string) => Promise<ChatUser | null>;
-    openChatWithUser: (userId: string) => Promise<void>;
+    openChatWithUser: (userId: string, property?: PropertyChatContext) => Promise<void>;
     searchUsers: (q: string) => Promise<ChatUser[]>;
 }
 
@@ -75,6 +83,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isTyping, setIsTyping] = useState(false);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [usersCache, setUsersCache] = useState<Record<string, ChatUser>>({});
+    const [propertyContext, setPropertyContext] = useState<PropertyChatContext | null>(null);
 
     const isChatOpenRef = useRef(false);
     useEffect(() => {
@@ -308,9 +317,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const openChatWithUser = useCallback(
-        async (userId: string) => {
+        async (userId: string, property?: PropertyChatContext) => {
             setIsChatOpen(true);
             setActiveConversation(userId);
+            setPropertyContext(property ?? null);
             await fetchUser(userId);
         },
         [fetchUser],
@@ -345,6 +355,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 isTyping,
                 isChatOpen,
                 usersCache,
+                propertyContext,
                 toggleChat,
                 setIsChatOpen,
                 sendMessage,

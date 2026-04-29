@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { existsSync, mkdirSync } from 'fs';
 import { Model, Types } from 'mongoose';
 import { GeocodingService } from '../geo/geocoding.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -18,7 +19,14 @@ export class PropertyService implements OnModuleInit {
         @InjectModel(Like.name) private likeModel: Model<LikeDocument>,
         @InjectModel(Comment.name) private commentModel: Model<CommentDocument>,
         private readonly geocodingService: GeocodingService,
-    ) { }
+    ) {
+        // Ensure the uploads directory exists on startup so file uploads never fail
+        const uploadsDir = './uploads/properties';
+        if (!existsSync(uploadsDir)) {
+            mkdirSync(uploadsDir, { recursive: true });
+            this.logger.log(`Created uploads directory: ${uploadsDir}`);
+        }
+    }
 
     async onModuleInit() {
         try {
@@ -423,5 +431,29 @@ export class PropertyService implements OnModuleInit {
     async getComments(propertyId: string) {
         if (!Types.ObjectId.isValid(propertyId)) throw new NotFoundException('Invalid Property ID');
         return this.commentModel.find({ propertyId: new Types.ObjectId(propertyId) }).sort({ createdAt: -1 });
+    }
+
+    async getMyComments(userId: string): Promise<any[]> {
+        const comments = await this.commentModel
+            .find({ userId })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        if (!comments.length) return [];
+
+        const propertyIds = [...new Set(comments.map((c) => c.propertyId.toString()))];
+        const properties = await this.propertyModel
+            .find({ _id: { $in: propertyIds } }, { title: 1, images: 1 })
+            .lean();
+
+        const propertyMap = Object.fromEntries(
+            properties.map((p) => [p._id.toString(), p]),
+        );
+
+        return comments.map((c) => ({
+            ...c,
+            propertyTitle: propertyMap[c.propertyId.toString()]?.title ?? 'נכס לא ידוע',
+            propertyImage: propertyMap[c.propertyId.toString()]?.images?.[0] ?? null,
+        }));
     }
 }

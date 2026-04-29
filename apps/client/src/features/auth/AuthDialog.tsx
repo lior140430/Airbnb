@@ -215,8 +215,8 @@ export const AuthDialog: React.FC<AuthDialogProps> = ({ open, onOpenChange }) =>
                     </div>
 
 
-                    <h3 className='dialog-welcome-text' style={{ textAlign: 'start', fontSize: '22px', fontWeight: 600, marginBottom: '24px' }}>
-                        ברוכים הבאים ל-Yad2
+                    <h3 className='dialog-welcome-text' style={{ textAlign: 'center', fontSize: '22px', fontWeight: 600, marginBottom: '24px' }}>
+                        ברוכים הבאים ל-Airbnb
                     </h3>
 
                     <form onSubmit={handleContinue} className='auth-form' style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
