@@ -7,6 +7,7 @@ import { SearchBar, type SearchFilters } from '@/features/properties/components/
 import { getUserInitial } from '@/utils/user';
 import { MessageCircle, User } from 'lucide-react';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Header.css';
 
 interface HeaderProps {
@@ -19,9 +20,11 @@ export const Header: React.FC<HeaderProps> = ({ onLoginClick, onProfileClick, on
     const { user, isAuthenticated } = useAuth();
     const { toggleChat, unreadCount } = useChatContext();
     const { setSearchFilters } = useProperty();
+    const navigate = useNavigate();
 
     const handleSearch = (filters: SearchFilters) => {
         setSearchFilters(filters);
+        navigate('/');
     };
 
     return (

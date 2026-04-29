@@ -86,6 +86,8 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onRefr
                     beds={property.beds}
                     bathrooms={property.bathrooms}
                     amenities={property.amenities}
+                    avgRating={avgRating}
+                    commentsCount={property.commentsCount}
                 />
 
                 <PropertySidebar
