@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { existsSync, mkdirSync } from 'fs';
 import { Model, Types } from 'mongoose';
@@ -556,6 +556,16 @@ export class PropertyService implements OnModuleInit {
     async getComments(propertyId: string) {
         if (!Types.ObjectId.isValid(propertyId)) throw new NotFoundException('Invalid Property ID');
         return this.commentModel.find({ propertyId: new Types.ObjectId(propertyId) }).sort({ createdAt: -1 });
+    }
+
+    async deleteComment(commentId: string, userId: string): Promise<{ deleted: boolean }> {
+        const comment = await this.commentModel.findById(commentId);
+        if (!comment) throw new NotFoundException('Comment not found');
+        if (comment.userId !== userId) throw new ForbiddenException('Not authorized to delete this comment');
+        await comment.deleteOne();
+        // Decrement commentsCount on the property
+        await this.propertyModel.findByIdAndUpdate(comment.propertyId, { $inc: { commentsCount: -1 } });
+        return { deleted: true };
     }
 
     async getMyComments(userId: string): Promise<any[]> {

@@ -11,6 +11,16 @@ class LocationDto {
     street: string;
 }
 
+class CoordinatesDto {
+    @IsNumber()
+    @Type(() => Number)
+    lat: number;
+
+    @IsNumber()
+    @Type(() => Number)
+    lng: number;
+}
+
 export class CreatePropertyDto {
     @IsString()
     @IsNotEmpty()
@@ -58,4 +68,10 @@ export class CreatePropertyDto {
     @IsString({ each: true })
     @Transform(({ value }) => (Array.isArray(value) ? value : value ? [value] : []))
     amenities?: string[];
+
+    @IsOptional()
+    @IsObject()
+    @ValidateNested()
+    @Type(() => CoordinatesDto)
+    coordinates?: CoordinatesDto;
 }

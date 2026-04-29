@@ -189,4 +189,12 @@ export class PropertyController {
     getComments(@Param('id') id: string) {
         return this.propertyService.getComments(id);
     }
+
+    @Delete('comments/:commentId')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiOperation({ summary: 'Delete a comment written by the current user' })
+    @ApiResponse({ status: 200, description: 'Comment deleted.' })
+    deleteComment(@Param('commentId') commentId: string, @Req() req) {
+        return this.propertyService.deleteComment(commentId, req.user._id);
+    }
 }
