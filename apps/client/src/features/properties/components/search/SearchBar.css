@@ -457,6 +457,45 @@
 
 
 
+/* ─── Nominatim location suggestions ─────────────────── */
+.location-suggestions {
+    position: absolute;
+    z-index: 200;
+    top: 100%;
+    right: 0;
+    left: 0;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.location-suggestions li {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border-color);
+    direction: rtl;
+    line-height: 1.4;
+    color: var(--text-main);
+}
+
+.location-suggestions li:last-child {
+    border-bottom: none;
+}
+
+.location-suggestions li:hover {
+    background: var(--bg-light, #f7f7f7);
+}
+
 /* ─── Responsive ──────────────────────────────────────── */
 @media (max-width: 640px) {
     .search-bar-expanded {
