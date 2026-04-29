@@ -5,7 +5,7 @@ import { ImageUpload } from '@/components/ui/ImageUpload/ImageUpload';
 import { TextField } from '@/components/ui/TextField/TextField';
 import { useFormState } from '@/hooks/useFormState';
 import { Bath, Bed, Car, Dumbbell, Minus, PawPrint, Plus, Sofa, Thermometer, Trees, Users, Utensils, WashingMachine, Waves, Wifi, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createProperty } from '../../property.service';
 import './CreatePropertyDialog.css';
 
@@ -41,6 +41,19 @@ const SPEC_FIELDS: SpecField[] = [
     { key: 'bathrooms', label: 'חדרי אמבטיה', icon: <Bath size={18} />, min: 1, max: 10 },
 ];
 
+interface NominatimResult {
+    display_name: string;
+    lat: string;
+    lon: string;
+    address: {
+        city?: string;
+        town?: string;
+        village?: string;
+        road?: string;
+        house_number?: string;
+    };
+}
+
 export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open, onOpenChange, onSuccess }) => {
     const [step, setStep] = useState<Step>('details');
     const [loading, setLoading] = useState(false);
@@ -52,6 +65,13 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
     const [amenities, setAmenities] = useState<string[]>([]);
     const [images, setImages] = useState<File[]>([]);
 
+    // Address autocomplete state
+    const [addressQuery, setAddressQuery] = useState('');
+    const [addressSuggestions, setAddressSuggestions] = useState<NominatimResult[]>([]);
+    const [addressLoading, setAddressLoading] = useState(false);
+    const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+    const addressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     useEffect(() => {
         if (open) {
             setStep('details');
@@ -60,11 +80,54 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
             setAmenities([]);
             setImages([]);
             setError(null);
+            setAddressQuery('');
+            setAddressSuggestions([]);
+            setCoordinates(null);
         }
     }, [open]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         handleChange(e);
+        setError(null);
+    };
+
+    const handleAddressInput = (value: string) => {
+        setAddressQuery(value);
+        setCoordinates(null);
+        handleChange({ target: { name: 'city', value: '' } } as React.ChangeEvent<HTMLInputElement>);
+        handleChange({ target: { name: 'street', value: '' } } as React.ChangeEvent<HTMLInputElement>);
+        if (addressTimeoutRef.current) clearTimeout(addressTimeoutRef.current);
+        if (value.length < 3) {
+            setAddressSuggestions([]);
+            return;
+        }
+        addressTimeoutRef.current = setTimeout(async () => {
+            setAddressLoading(true);
+            try {
+                const res = await fetch(
+                    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&addressdetails=1&limit=5&countrycodes=il`,
+                    { headers: { 'Accept-Language': 'he' } }
+                );
+                const data: NominatimResult[] = await res.json();
+                setAddressSuggestions(data);
+            } catch {
+                // silently fail — user can try again
+            } finally {
+                setAddressLoading(false);
+            }
+        }, 400);
+    };
+
+    const handleAddressSelect = (result: NominatimResult) => {
+        const city = result.address.city || result.address.town || result.address.village || '';
+        const road = result.address.road || '';
+        const houseNum = result.address.house_number || '';
+        const street = houseNum ? `${road} ${houseNum}`.trim() : road;
+        handleChange({ target: { name: 'city', value: city } } as React.ChangeEvent<HTMLInputElement>);
+        handleChange({ target: { name: 'street', value: street } } as React.ChangeEvent<HTMLInputElement>);
+        setCoordinates({ lat: parseFloat(result.lat), lng: parseFloat(result.lon) });
+        setAddressQuery(result.display_name);
+        setAddressSuggestions([]);
         setError(null);
     };
 
@@ -77,12 +140,16 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
     };
 
     const validateStep1 = () => {
-        if (!formData.title || !formData.description || !formData.price || !formData.city || !formData.street) {
+        if (!formData.title || !formData.description || !formData.price) {
             setError('נא למלא את כל השדות החובה');
             return false;
         }
         if (isNaN(Number(formData.price))) {
             setError('מחיר לא תקין');
+            return false;
+        }
+        if (!coordinates) {
+            setError('יש לבחור כתובת מהרשימה כדי לאמת את המיקום');
             return false;
         }
         return true;
@@ -124,6 +191,10 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
             data.append('bathrooms', String(specs.bathrooms));
             amenities.forEach((a) => data.append('amenities', a));
             images.forEach((file) => data.append('images', file));
+            if (coordinates) {
+                data.append('coordinates[lat]', String(coordinates.lat));
+                data.append('coordinates[lng]', String(coordinates.lng));
+            }
 
             await createProperty(data);
             resetForm();
@@ -199,23 +270,31 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
                                 onChange={handleInputChange}
                                 required
                             />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+
+                            {/* Address autocomplete */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative' }}>
+                                <label style={{ fontSize: '14px', fontWeight: 600 }}>כתובת</label>
                                 <TextField
-                                    name="city"
-                                    label="עיר"
-                                    placeholder="תל אביב"
-                                    value={formData.city}
-                                    onChange={handleInputChange}
-                                    required
+                                    name="addressQuery"
+                                    placeholder="חפש כתובת — לדוגמה: דיזנגוף 100 תל אביב"
+                                    value={addressQuery}
+                                    onChange={(e) => handleAddressInput(e.target.value)}
                                 />
-                                <TextField
-                                    name="street"
-                                    label="רחוב"
-                                    placeholder="דיזנגוף 100"
-                                    value={formData.street}
-                                    onChange={handleInputChange}
-                                    required
-                                />
+                                {addressLoading && (
+                                    <small style={{ color: 'var(--text-muted)', fontSize: '12px' }}>מחפש...</small>
+                                )}
+                                {coordinates && (
+                                    <small style={{ color: 'green', fontSize: '12px' }}>✓ כתובת אומתה</small>
+                                )}
+                                {addressSuggestions.length > 0 && (
+                                    <ul className="address-suggestions">
+                                        {addressSuggestions.map((s, i) => (
+                                            <li key={i} onClick={() => handleAddressSelect(s)}>
+                                                {s.display_name}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
                         </div>
                     )}
@@ -287,7 +366,7 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
                 </div>
 
                 {/* Footer */}
-                <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div className="create-property-footer">
                     {step !== 'details' ? (
                         <Button variant="primary" onClick={handleBack} disabled={loading}>חזרה</Button>
                     ) : (
@@ -302,4 +381,3 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
         </Dialog.Root>
     );
 };
-
