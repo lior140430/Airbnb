@@ -40,6 +40,7 @@ export interface Comment {
     _id: string;
     text: string;
     username: string;
+    userId?: string;
     rating: number;
     createdAt?: string;
 }
@@ -140,4 +141,15 @@ export const getMyComments = async (): Promise<MyComment[]> => {
 
 export const deleteProperty = async (id: string): Promise<void> => {
     await propertyApi.delete(`/properties/${id}`);
+};
+
+export const deleteComment = async (commentId: string): Promise<void> => {
+    await propertyApi.delete(`/properties/comments/${commentId}`);
+};
+
+export const updateProperty = async (id: string, data: FormData): Promise<Property> => {
+    const response = await propertyApi.patch(`/properties/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
 };
