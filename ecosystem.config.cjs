@@ -20,7 +20,7 @@ module.exports = {
             script: 'serve.mjs',
             env_production: {
                 NODE_ENV: 'production',
-                PORT: '3000',
+                PORT: '80',
             },
         },
     ],
