@@ -31,7 +31,9 @@ export const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onRefr
             openAuthDialog();
             return;
         }
-        openChatWithUser(property.ownerId);
+        if (property.ownerId) {
+            openChatWithUser(property.ownerId);
+        }
     };
 
     const handleLikeClick = async (e: React.MouseEvent) => {
