@@ -16,6 +16,9 @@ interface PropertyContextType {
     setSearchFilters: (filters: SearchFilters) => void;
     isSearching: boolean;
     setIsSearching: (v: boolean) => void;
+    isHostDialogOpen: boolean;
+    openHostDialog: () => void;
+    closeHostDialog: () => void;
 }
 
 const PropertyContext = createContext<PropertyContextType | undefined>(undefined);
@@ -24,6 +27,7 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [refreshTrigger, setRefreshTrigger] = useState(0);
     const [searchFilters, setSearchFiltersState] = useState<SearchFilters>(EMPTY_FILTERS);
     const [isSearching, setIsSearching] = useState(false);
+    const [isHostDialogOpen, setIsHostDialogOpen] = useState(false);
 
     const triggerRefresh = useCallback(() => {
         setRefreshTrigger(prev => prev + 1);
@@ -35,8 +39,11 @@ export const PropertyProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setRefreshTrigger(prev => prev + 1);
     }, []);
 
+    const openHostDialog = useCallback(() => setIsHostDialogOpen(true), []);
+    const closeHostDialog = useCallback(() => setIsHostDialogOpen(false), []);
+
     return (
-        <PropertyContext.Provider value={{ refreshTrigger, triggerRefresh, searchFilters, setSearchFilters, isSearching, setIsSearching }}>
+        <PropertyContext.Provider value={{ refreshTrigger, triggerRefresh, searchFilters, setSearchFilters, isSearching, setIsSearching, isHostDialogOpen, openHostDialog, closeHostDialog }}>
             {children}
         </PropertyContext.Provider>
     );
