@@ -494,7 +494,7 @@ export class PropertyService implements OnModuleInit {
         return result[0];
     }
 
-    async update(id: string, updatePropertyDto: UpdatePropertyDto, userId: string) {
+    async update(id: string, updatePropertyDto: UpdatePropertyDto, userId: string, newImages: string[] = []) {
         const property = await this.propertyModel.findOne({ _id: id });
         if (!property) throw new NotFoundException('Property not found');
 
@@ -502,7 +502,15 @@ export class PropertyService implements OnModuleInit {
             throw new UnauthorizedException('You are not the owner of this property');
         }
 
-        return this.propertyModel.findByIdAndUpdate(id, updatePropertyDto, { new: true });
+        const { keepImages, ...rest } = updatePropertyDto;
+
+        // Build the final images array: kept existing + newly uploaded
+        const images = [
+            ...(keepImages ?? property.images),
+            ...newImages,
+        ];
+
+        return this.propertyModel.findByIdAndUpdate(id, { ...rest, images }, { new: true });
     }
 
     async remove(id: string, userId: string) {

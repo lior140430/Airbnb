@@ -1,0 +1,220 @@
+.epd-dialog-content {
+    padding: 0 !important;
+    max-width: 640px;
+    width: 95vw;
+    max-height: 90vh;
+    overflow: hidden;
+    border-radius: 16px !important;
+}
+
+.epd-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 90vh;
+    direction: rtl;
+}
+
+.epd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.epd-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.epd-close-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 4px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    transition: background 0.15s;
+}
+.epd-close-btn:hover { background: var(--bg-light, #f5f5f5); }
+
+.epd-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.epd-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.epd-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+/* Specs */
+.epd-specs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.epd-spec-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.epd-spec-icon { color: var(--text-muted); flex-shrink: 0; }
+
+.epd-spec-label {
+    flex: 1;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.epd-spec-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.epd-spec-btn {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.epd-spec-btn:hover { background: var(--bg-light, #f5f5f5); }
+
+.epd-spec-value {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Amenities */
+.epd-amenities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.epd-amenity-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1.5px solid var(--border-color);
+    background: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    transition: border-color 0.15s, background 0.15s;
+    text-align: right;
+}
+.epd-amenity-btn--active {
+    border-color: var(--brand-joy, #222);
+    background: #f7f0ff;
+    color: var(--brand-joy, #222);
+}
+
+/* Images */
+.epd-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px;
+}
+
+.epd-images-new { margin-top: 8px; }
+
+.epd-image-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 1;
+}
+
+.epd-image-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.epd-image-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    padding: 0;
+}
+.epd-image-remove:hover { background: rgba(220, 38, 38, 0.85); }
+
+.epd-add-image-btn {
+    align-self: flex-start;
+    padding: 8px 16px;
+    border: 1.5px dashed var(--border-color);
+    background: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-muted);
+    transition: border-color 0.15s, color 0.15s;
+}
+.epd-add-image-btn:hover {
+    border-color: var(--brand-joy, #222);
+    color: var(--text-primary);
+}
+
+.epd-error {
+    color: #dc2626;
+    font-size: 13px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 0;
+}
+
+.epd-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
