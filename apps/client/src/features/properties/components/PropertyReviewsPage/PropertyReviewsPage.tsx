@@ -6,16 +6,16 @@ import { useAuth } from '@/context/AuthContext';
 import { useAsync } from '@/hooks/useAsync';
 import { getAverageRating } from '@/utils/rating';
 import { getImageUrl } from '@/utils/image';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, Trash2 } from 'lucide-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { addComment, getComments, getProperty, type Comment, type Property } from '../../property.service';
+import { addComment, getComments, getProperty, deleteComment, type Comment, type Property } from '../../property.service';
 import './PropertyReviewsPage.css';
 
 export const PropertyReviewsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const { isAuthenticated, openAuthDialog } = useAuth();
+    const { isAuthenticated, openAuthDialog, user } = useAuth();
 
     const [newRating, setNewRating] = useState(0);
     const [newComment, setNewComment] = useState('');
@@ -123,6 +123,19 @@ export const PropertyReviewsPage: React.FC = () => {
                                 <div className="prp-reviewer-name">{comment.username}</div>
                                 <div className="prp-review-date">{comment.createdAt?.substring(0, 10)}</div>
                             </div>
+                            {user && comment.userId === user._id && (
+                                <button
+                                    className="prp-delete-btn"
+                                    title="מחק ביקורת"
+                                    onClick={async () => {
+                                        if (!window.confirm('למחוק את הביקורת?')) return;
+                                        await deleteComment(comment._id);
+                                        refreshComments();
+                                    }}
+                                >
+                                    <Trash2 size={15} />
+                                </button>
+                            )}
                         </div>
                         <div className="prp-review-stars">
                             <StarRating value={comment.rating} readOnly size={14} />
