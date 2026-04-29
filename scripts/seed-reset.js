@@ -23,12 +23,12 @@ const PROPERTIES = [
         price: 850,
         location: { city: 'תל אביב', street: 'דיזנגוף 45' },
         images: [
-            IMG('1502672260266-1c1ef2d93688'),
-            IMG('1556909114-f6e7ad7d3136'),
-            IMG('1560448204-e02f11c3d0e2'),
+            IMG('1502672260266-1c1ef2d93688'),  // B ✓
+            IMG('1556909114-f6e7ad7d3136'),      // E ✓
+            IMG('1560448204-e02f11c3d0e2'),      // G ✓
         ],
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
-        amenities: ['wifi', 'pool', 'parking', 'ac'],
+        amenities: ['wifi', 'pool', 'parking', 'airConditioning'],
         coordinates: { lat: 32.0853, lng: 34.7818 },
     },
     {
@@ -37,12 +37,12 @@ const PROPERTIES = [
         price: 450,
         location: { city: 'תל אביב', street: 'רוטשילד 12' },
         images: [
-            IMG('1545324418-cc1a3fa10c00'),
-            IMG('1484154133-5be7c1b22d11'),
-            IMG('1584622650111-993a426fbf0a'),
+            IMG('1545324418-cc1a3fa10c00'),      // D ✓
+            IMG('1584622650111-993a426fbf0a'),    // K ✓
+            IMG('1512917774080-9991f1c4c750'),    // C ✓
         ],
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
-        amenities: ['wifi', 'ac'],
+        amenities: ['wifi', 'airConditioning'],
         coordinates: { lat: 32.0641, lng: 34.7741 },
     },
     {
@@ -51,12 +51,12 @@ const PROPERTIES = [
         price: 600,
         location: { city: 'חיפה', street: 'הכרמל 7' },
         images: [
-            IMG('1571508601891-ca5e7a713859'),
-            IMG('1554995207-c9d0f5a5d62f'),
-            IMG('1600566752355-35792bedcfea'),
+            IMG('1571508601891-ca5e7a713859'),    // I ✓
+            IMG('1600566752355-35792bedcfea'),    // N ✓
+            IMG('1558618666-fcd25c85cd64'),       // F ✓
         ],
         maxGuests: 6, bedrooms: 3, beds: 4, bathrooms: 2,
-        amenities: ['wifi', 'parking', 'ac'],
+        amenities: ['wifi', 'parking', 'airConditioning'],
         coordinates: { lat: 32.7940, lng: 34.9896 },
     },
     {
@@ -65,12 +65,12 @@ const PROPERTIES = [
         price: 700,
         location: { city: 'ראש פינה', street: 'הגפן 3' },
         images: [
-            IMG('1586023492125-27264fee2e32'),
-            IMG('1598928506311-c55ded91a20c'),
-            IMG('1600573472591-b69e62aca5d7'),
+            IMG('1560472354-b33ff0c44a43'),      // P ✓
+            IMG('1598928506311-c55ded91a20c'),    // M ✓
+            IMG('1631049307264-da0ec9d70304'),    // O ✓
         ],
         maxGuests: 8, bedrooms: 4, beds: 5, bathrooms: 2,
-        amenities: ['wifi', 'parking', 'pets'],
+        amenities: ['wifi', 'parking', 'petFriendly'],
         coordinates: { lat: 32.9758, lng: 35.5678 },
     },
     {
@@ -79,9 +79,9 @@ const PROPERTIES = [
         price: 380,
         location: { city: 'מצפה רמון', street: 'דרך הנחל 1' },
         images: [
-            IMG('1613241399954-be9b00e18a20'),
-            IMG('1565182999-41fa53c76b45'),
-            IMG('1600210492493-0fe1a60480c8'),
+            IMG('1513694203232-719a280e022f'),    // Q ✓
+            IMG('1497366216548-37526070297c'),    // R ✓
+            IMG('1524758631624-e2822e304c36'),    // S ✓
         ],
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['breakfast'],
@@ -95,12 +95,12 @@ const PROPERTIES = [
         price: 1200,
         location: { city: 'ירושלים', street: 'המלך דוד 5' },
         images: [
-            IMG('1600585154526-58884b39c4ea'),
-            IMG('1555041469-eade50a31b06'),
-            IMG('1493809842364-78817add7ffb'),
+            IMG('1493809842364-78817add7ffb'),    // A ✓
+            IMG('1560448204-e02f11c3d0e2'),       // G ✓
+            IMG('1600566752355-35792bedcfea'),    // N ✓
         ],
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 2,
-        amenities: ['wifi', 'parking', 'ac', 'gym'],
+        amenities: ['wifi', 'parking', 'airConditioning', 'gym'],
         coordinates: { lat: 31.7767, lng: 35.2345 },
     },
     {
@@ -109,12 +109,12 @@ const PROPERTIES = [
         price: 1500,
         location: { city: 'אילת', street: 'תרשיש 8' },
         images: [
-            IMG('1616594039964-ae485a617a19'),
-            IMG('1560185893-c12829ea7b62'),
-            IMG('1558618666-fcd25c85cd64'),
+            IMG('1588854337115-1c67d9247e4d'),    // L ✓
+            IMG('1558618666-fcd25c85cd64'),       // F ✓
+            IMG('1598928506311-c55ded91a20c'),    // M ✓
         ],
         maxGuests: 10, bedrooms: 5, beds: 6, bathrooms: 3,
-        amenities: ['wifi', 'pool', 'parking', 'ac', 'bbq'],
+        amenities: ['wifi', 'pool', 'parking', 'airConditioning'],
         coordinates: { lat: 29.5577, lng: 34.9519 },
     },
     {
@@ -123,12 +123,12 @@ const PROPERTIES = [
         price: 520,
         location: { city: 'נתניה', street: 'הרצל 22' },
         images: [
-            IMG('1583845112203-29329902332e'),
-            IMG('1512917774080-9991f1c4c750'),
-            IMG('1582268611-4266d27571bd'),
+            IMG('1583845112203-29329902332e'),    // J ✓
+            IMG('1556909114-f6e7ad7d3136'),       // E ✓
+            IMG('1584622650111-993a426fbf0a'),    // K ✓
         ],
         maxGuests: 4, bedrooms: 2, beds: 3, bathrooms: 1,
-        amenities: ['wifi', 'ac'],
+        amenities: ['wifi', 'airConditioning'],
         coordinates: { lat: 32.3226, lng: 34.8533 },
     },
     {
@@ -137,9 +137,9 @@ const PROPERTIES = [
         price: 650,
         location: { city: 'צפת', street: 'אלכסנדר זייד 4' },
         images: [
-            IMG('1554995207-c9d0f5a5d62f'),
-            IMG('1588854337115-1c67d9247e4d'),
-            IMG('1631049307264-da0ec9d70304'),
+            IMG('1524758631624-e2822e304c36'),    // S ✓
+            IMG('1497366216548-37526070297c'),    // R ✓
+            IMG('1631049307264-da0ec9d70304'),    // O ✓
         ],
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'parking'],
@@ -151,9 +151,9 @@ const PROPERTIES = [
         price: 280,
         location: { city: 'באר שבע', street: 'רגר 10' },
         images: [
-            IMG('1564078516393-cf04bd966897'),
-            IMG('1600607688969-0bf6d93a32fe'),
-            IMG('1541123437800-36e3e30b0ef7'),
+            IMG('1564078516393-cf04bd966897'),    // H ✓
+            IMG('1560448204-e02f11c3d0e2'),       // G ✓
+            IMG('1556909114-f6e7ad7d3136'),       // E ✓
         ],
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['wifi'],

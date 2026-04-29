@@ -219,6 +219,8 @@ export class PropertyService implements OnModuleInit {
     async findAll(page: number = 1, limit: number = 10, ownerId?: string, currentUserId?: string, search?: {
         q?: string;
         location?: string;
+        locations?: string[];       // multiple location groups → intersected
+        excludeLocation?: string;   // negative location filter ("except X")
         checkIn?: string;
         checkOut?: string;
         guests?: number;
@@ -235,21 +237,40 @@ export class PropertyService implements OnModuleInit {
             pipeline.push({ $match: { ownerId } });
         }
 
-        // Location search — three strategies in priority order:
-        //  1. Semantic group (e.g. "ליד הים" → coastal cities list)
-        //  2. Exact/normalised city name + geographic bounding-box fallback
-        if (search?.location) {
-            const raw = search.location.trim();
+        // ── Location search ────────────────────────────────────────────────
+        // Priority: locations[] (multi-group intersection) > location (single)
+        // Helper: resolve a raw location string to a Set of DB city names
+        const resolveCities = (raw: string): Set<string> => {
+            const trimmed = raw.trim();
+            const grp = this.LOCATION_GROUPS[trimmed] ?? this.LOCATION_GROUPS[trimmed.toLowerCase()];
+            if (grp && grp.length > 0) return new Set(grp);
+            return new Set([this.normalizeLocation(trimmed)]);
+        };
 
-            // Strategy 1 — semantic group keyword
+        if (search?.locations && search.locations.length > 0) {
+            // Multi-location: intersect all resolved city sets
+            const sets = search.locations.map(l => resolveCities(l));
+            let result = sets[0];
+            for (let i = 1; i < sets.length; i++) {
+                result = new Set([...result].filter(c => sets[i].has(c)));
+            }
+            // If intersection is empty (contradictory filters), fall back to union
+            const finalCities = result.size > 0
+                ? [...result]
+                : [...new Set(sets.flatMap(s => [...s]))];
+            pipeline.push({ $match: { 'location.city': { $in: finalCities } } });
+
+        } else if (search?.location) {
+            // Single location — three strategies in priority order:
+            //  1. Semantic group (e.g. "ליד הים" → coastal cities list)
+            //  2. Exact/normalised city name + geographic bounding-box fallback
+            const raw = search.location.trim();
             const groupCities = this.LOCATION_GROUPS[raw] ?? this.LOCATION_GROUPS[raw.toLowerCase()];
             if (groupCities && groupCities.length > 0) {
                 pipeline.push({ $match: { 'location.city': { $in: groupCities } } });
             } else {
-                // Strategy 2 — normalise name then try city regex + bounding box
                 const normalized = this.normalizeLocation(raw);
                 const coords = await this.geocodingService.geocode(normalized).catch(() => null);
-
                 if (coords) {
                     const delta = 0.36; // ≈ 40 km in degrees lat/lng
                     pipeline.push({
@@ -266,6 +287,18 @@ export class PropertyService implements OnModuleInit {
                 } else {
                     pipeline.push({ $match: { 'location.city': { $regex: normalized, $options: 'i' } } });
                 }
+            }
+        }
+
+        // Negative location filter (applies regardless of location/locations)
+        if (search?.excludeLocation) {
+            const raw = search.excludeLocation.trim();
+            const excludeCities = this.LOCATION_GROUPS[raw] ?? this.LOCATION_GROUPS[raw.toLowerCase()];
+            if (excludeCities && excludeCities.length > 0) {
+                pipeline.push({ $match: { 'location.city': { $nin: excludeCities } } });
+            } else {
+                const normalized = this.normalizeLocation(raw);
+                pipeline.push({ $match: { 'location.city': { $not: { $regex: `^${normalized}$`, $options: 'i' } } } });
             }
         }
 

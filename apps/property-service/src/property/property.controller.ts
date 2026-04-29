@@ -94,6 +94,8 @@ export class PropertyController {
             currentUserId,
             {
                 location,
+                locations: parsed.locations,
+                excludeLocation: parsed.excludeLocation,
                 checkIn,
                 checkOut,
                 guests,
