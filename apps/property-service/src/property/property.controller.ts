@@ -146,8 +146,15 @@ export class PropertyController {
     @UseGuards(AuthGuard('jwt'))
     @ApiOperation({ summary: 'Update a property' })
     @ApiResponse({ status: 200, description: 'The property has been successfully updated.' })
-    update(@Param('id') id: string, @Body() updatePropertyDto: UpdatePropertyDto, @Req() req) {
-        return this.propertyService.update(id, updatePropertyDto, req.user._id);
+    @UseInterceptors(FilesInterceptor('images', 5, multerOptions))
+    update(
+        @Param('id') id: string,
+        @Body() updatePropertyDto: UpdatePropertyDto,
+        @UploadedFiles() files: Array<Express.Multer.File>,
+        @Req() req,
+    ) {
+        const newImages = files ? files.map((f) => f.path.replace(/\\/g, '/')) : [];
+        return this.propertyService.update(id, updatePropertyDto, req.user._id, newImages);
     }
 
     @Delete(':id')
