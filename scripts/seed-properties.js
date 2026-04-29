@@ -7,19 +7,69 @@ const { MongoClient, ObjectId } = require('mongodb');
 
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://server:e5f5c26a7580f0bac585c1d50369c1227114184f9c92f048@localhost:21771/homeseek';
 
-// ── Apartment image sets (Unsplash) ──────────────────────────────────────────
-// Each set = 3-4 images for one property
 const IMG = (id) => `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=800&q=80`;
 
-const IMAGE_SETS = [
-    [ IMG('1502672260266-1c1ef2d93688'), IMG('1556909114-f6e7ad7d3136'), IMG('1560448204-e02f11c3d0e2') ],
-    [ IMG('1545324418-cc1a3fa10c00'),    IMG('1484154133-5be7c1b22d11'), IMG('1584622650111-993a426fbf0a') ],
-    [ IMG('1555041469-eade50a31b06'),    IMG('1522771739-8b9b8d5b9c8e'), IMG('1493809842364-78817add7ffb') ],
-    [ IMG('1512917774080-9991f1c4c750'), IMG('1560185893-c12829ea7b62'), IMG('1556909114-f6e7ad7d3136') ],
-    [ IMG('1582268611-4266d27571bd'),    IMG('1630699144-8dd60a3oba99'), IMG('1560448204-e02f11c3d0e2') ],
-    [ IMG('1631049307264-da0ec9d70304'), IMG('1502672260266-1c1ef2d93688'), IMG('1545324418-cc1a3fa10c00') ],
-    [ IMG('1484154133-5be7c1b22d11'),    IMG('1555041469-eade50a31b06'), IMG('1522771739-8b9b8d5b9c8e') ],
-    [ IMG('1560185893-c12829ea7b62'),    IMG('1556909114-f6e7ad7d3136'), IMG('1584622650111-993a426fbf0a') ],
+// 75 unique Unsplash photo IDs for apartment / interior photography.
+// 25 cover photos (index 0–24) — one per property, all unique.
+// Grouped in threes: each property gets IDs at positions [i*3], [i*3+1], [i*3+2].
+const ALL_IDS = [
+    // Property 0 — modern living room set
+    '1502672260266-1c1ef2d93688', '1556909114-f6e7ad7d3136', '1560448204-e02f11c3d0e2',
+    // Property 1 — bright bedroom set
+    '1545324418-cc1a3fa10c00',    '1484154133-5be7c1b22d11', '1584622650111-993a426fbf0a',
+    // Property 2 — gray sofa set
+    '1555041469-eade50a31b06',    '1493809842364-78817add7ffb', '1512917774080-9991f1c4c750',
+    // Property 3 — kitchen & dining set
+    '1560185893-c12829ea7b62',    '1582268611-4266d27571bd',    '1631049307264-da0ec9d70304',
+    // Property 4 — modern white apartment
+    '1600585154526-58884b39c4ea', '1502672260266-1c1ef2d93688', '1484154133-5be7c1b22d11',
+    // Property 5 — warm tones interior
+    '1600210492493-0fe1a60480c8', '1545324418-cc1a3fa10c00',    '1555041469-eade50a31b06',
+    // Property 6 — Scandinavian style
+    '1600566752355-35792bedcfea', '1560448204-e02f11c3d0e2',    '1584622650111-993a426fbf0a',
+    // Property 7 — penthouse terrace view
+    '1600573472591-b69e62aca5d7', '1493809842364-78817add7ffb', '1560185893-c12829ea7b62',
+    // Property 8 — Jerusalem stone walls
+    '1586023492125-27264fee2e32', '1556909114-f6e7ad7d3136',    '1582268611-4266d27571bd',
+    // Property 9 — rustic wooden bedroom
+    '1598928506311-c55ded91a20c', '1512917774080-9991f1c4c750', '1545324418-cc1a3fa10c00',
+    // Property 10 — bright loft
+    '1554995207-c9d0f5a5d62f',    '1555041469-eade50a31b06',    '1502672260266-1c1ef2d93688',
+    // Property 11 — luxury bathroom
+    '1600607688969-0bf6d93a32fe', '1584622650111-993a426fbf0a', '1560448204-e02f11c3d0e2',
+    // Property 12 — villa with pool
+    '1616594039964-ae485a617a19', '1493809842364-78817add7ffb', '1600566752355-35792bedcfea',
+    // Property 13 — coastal apartment
+    '1571508601891-ca5e7a713859', '1556909114-f6e7ad7d3136',    '1554995207-c9d0f5a5d62f',
+    // Property 14 — modern studio
+    '1565182999-41fa53c76b45',    '1600210492493-0fe1a60480c8', '1598928506311-c55ded91a20c',
+    // Property 15 — luxury villa interior
+    '1558618666-fcd25c85cd64',    '1512917774080-9991f1c4c750', '1616594039964-ae485a617a19',
+    // Property 16 — garden apartment
+    '1564078516393-cf04bd966897', '1555041469-eade50a31b06',    '1600573472591-b69e62aca5d7',
+    // Property 17 — cozy cottage
+    '1541123437800-36e3e30b0ef7', '1560185893-c12829ea7b62',    '1565182999-41fa53c76b45',
+    // Property 18 — urban chic
+    '1600585154340-be6161a56a0c', '1502672260266-1c1ef2d93688', '1600607688969-0bf6d93a32fe',
+    // Property 19 — desert retreat (Negev)
+    '1613241399954-be9b00e18a20', '1545324418-cc1a3fa10c00',    '1558618666-fcd25c85cd64',
+    // Property 20 — bohemian studio
+    '1583845112203-29329902332e', '1486325212991-386a5e2f3d40',    '1571508601891-ca5e7a713859',
+    // Property 21 — artsy loft
+    '1588854337115-1c67d9247e4d', '1584622650111-993a426fbf0a', '1564078516393-cf04bd966897',
+    // Property 22 — family home
+    '1507149831980-35298d432fa0', '1600566752355-35792bedcfea', '1541123437800-36e3e30b0ef7',
+    // Property 23 — sea-view flat
+    '1600121848594-d8be56841ece', '1560448204-e02f11c3d0e2',    '1583845112203-29329902332e',
+    // Property 24 — modern duplex
+    '1601058304738-c1bfb94ad5d3', '1582268611-4266d27571bd',    '1507149831980-35298d432fa0',
+];
+
+// Returns the 3-image array for property index i (0-based)
+const imgs = (i) => [
+    IMG(ALL_IDS[i * 3]),
+    IMG(ALL_IDS[i * 3 + 1]),
+    IMG(ALL_IDS[i * 3 + 2]),
 ];
 
 // ── 25 Hebrew property definitions ──────────────────────────────────────────
@@ -31,7 +81,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0799, lng: 34.7726 },
         maxGuests: 4, bedrooms: 3, beds: 3, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer'],
-        images: IMAGE_SETS[0],
+        images: imgs(0),
     },
     {
         title: 'פנטהאוז יוקרתי עם נוף לים בתל אביב',
@@ -40,7 +90,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0870, lng: 34.7677 },
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 2,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'parking', 'pool'],
-        images: IMAGE_SETS[1],
+        images: imgs(1),
     },
     {
         title: 'דירת סטודיו מודרנית ברחוב רוטשילד',
@@ -49,7 +99,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0636, lng: 34.7748 },
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen'],
-        images: IMAGE_SETS[2],
+        images: imgs(2),
     },
     {
         title: 'בית בוהמייני רגוע ברחוב שינקין',
@@ -58,7 +108,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0665, lng: 34.7746 },
         maxGuests: 3, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer'],
-        images: IMAGE_SETS[3],
+        images: imgs(3),
     },
     {
         title: 'דירת גן פרטית עם חצר בצפון תל אביב',
@@ -67,7 +117,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0790, lng: 34.7694 },
         maxGuests: 4, bedrooms: 2, beds: 3, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking', 'petFriendly'],
-        images: IMAGE_SETS[4],
+        images: imgs(4),
     },
     {
         title: 'דופלקס מרווח עם מרפסת גדולה ברמת גן',
@@ -76,7 +126,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0739, lng: 34.8199 },
         maxGuests: 6, bedrooms: 3, beds: 4, bathrooms: 2,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking', 'gym'],
-        images: IMAGE_SETS[5],
+        images: imgs(5),
     },
     {
         title: 'חדר שינה נעים בדירת שיתוף בגבעתיים',
@@ -85,7 +135,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0690, lng: 34.8106 },
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer'],
-        images: IMAGE_SETS[6],
+        images: imgs(6),
     },
     {
         title: 'דירה עם אופי בנחלת בנימין',
@@ -94,16 +144,16 @@ const PROPERTIES = [
         coordinates: { lat: 32.0682, lng: 34.7710 },
         maxGuests: 3, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen'],
-        images: IMAGE_SETS[7],
+        images: imgs(7),
     },
     {
         title: 'דירה מפנקת בלב ירושלים',
-        description: 'דירה יפה ומאובזרת ב-3 חדרים ברחוב בן יהודה הסואן. קרובה לשוק מחנה יהודה, רחוב יפו ורחוב הנביאים. עיצוב חם ומזמין. מתאים לבקרים בעיר הקדושה ולשהייה קצרה.',
+        description: 'דירה יפה ומאובזרת ב-3 חדרים ברחוב בן יהודה הסואן. קרובה לשוק מחנה יהודה, רחוב יפו ורחוב הנביאים. עיצוב חם ומזמין. מתאים לביקורים בעיר הקדושה ולשהייה קצרה.',
         price: 480, location: { city: 'ירושלים', street: 'בן יהודה 20' },
         coordinates: { lat: 32.0799, lng: 35.2176 },
         maxGuests: 4, bedrooms: 2, beds: 3, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer'],
-        images: IMAGE_SETS[0],
+        images: imgs(8),
     },
     {
         title: 'בית אבן ירושלמי קסום בעמק רפאים',
@@ -112,7 +162,7 @@ const PROPERTIES = [
         coordinates: { lat: 31.7650, lng: 35.2050 },
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'kitchen', 'washer', 'petFriendly'],
-        images: IMAGE_SETS[1],
+        images: imgs(9),
     },
     {
         title: 'דירת מאסטר עם נוף להרים בתלפיות',
@@ -121,7 +171,7 @@ const PROPERTIES = [
         coordinates: { lat: 31.7545, lng: 35.2348 },
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'parking'],
-        images: IMAGE_SETS[2],
+        images: imgs(10),
     },
     {
         title: 'דירת יוקרה עם נוף לים בחיפה הכרמל',
@@ -130,7 +180,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.7940, lng: 34.9896 },
         maxGuests: 6, bedrooms: 3, beds: 3, bathrooms: 2,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking'],
-        images: IMAGE_SETS[3],
+        images: imgs(11),
     },
     {
         title: 'דירת שיק בוואדי ניסנאס ההיסטורי',
@@ -139,7 +189,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.8185, lng: 35.0000 },
         maxGuests: 3, bedrooms: 1, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'kitchen', 'airConditioning'],
-        images: IMAGE_SETS[4],
+        images: imgs(12),
     },
     {
         title: 'פנטהאוז עם בריכה פרטית בנתניה',
@@ -148,7 +198,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.3285, lng: 34.8575 },
         maxGuests: 8, bedrooms: 4, beds: 5, bathrooms: 2,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking', 'pool'],
-        images: IMAGE_SETS[5],
+        images: imgs(13),
     },
     {
         title: 'דירת חוף עם גישה ישירה לים',
@@ -157,7 +207,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.3210, lng: 34.8530 },
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'parking'],
-        images: IMAGE_SETS[6],
+        images: imgs(14),
     },
     {
         title: 'וילה יוקרתית עם בריכה בהרצליה פיתוח',
@@ -166,7 +216,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.1644, lng: 34.8374 },
         maxGuests: 10, bedrooms: 5, beds: 6, bathrooms: 3,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking', 'pool', 'gym'],
-        images: IMAGE_SETS[7],
+        images: imgs(15),
     },
     {
         title: 'דירה חדשה ומושלמת בפתח תקווה',
@@ -175,7 +225,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0874, lng: 34.8862 },
         maxGuests: 4, bedrooms: 3, beds: 3, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking'],
-        images: IMAGE_SETS[0],
+        images: imgs(16),
     },
     {
         title: 'דירת גן נעימה בראשון לציון',
@@ -184,7 +234,7 @@ const PROPERTIES = [
         coordinates: { lat: 31.9730, lng: 34.7895 },
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'petFriendly'],
-        images: IMAGE_SETS[1],
+        images: imgs(17),
     },
     {
         title: 'סטודיו אמנותי ייחודי בנווה שאנן, חיפה',
@@ -193,7 +243,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.8020, lng: 35.0100 },
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen'],
-        images: IMAGE_SETS[2],
+        images: imgs(18),
     },
     {
         title: 'דירה מפנקת ומרווחת בבאר שבע',
@@ -202,7 +252,7 @@ const PROPERTIES = [
         coordinates: { lat: 31.2518, lng: 34.7913 },
         maxGuests: 8, bedrooms: 4, beds: 5, bathrooms: 2,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking'],
-        images: IMAGE_SETS[3],
+        images: imgs(19),
     },
     {
         title: 'צימר יוקרתי עם ג׳קוזי ונוף לנגב',
@@ -211,7 +261,7 @@ const PROPERTIES = [
         coordinates: { lat: 30.6105, lng: 34.8010 },
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen'],
-        images: IMAGE_SETS[4],
+        images: imgs(20),
     },
     {
         title: 'דירת חוף צעירה וחיה באשדוד',
@@ -220,7 +270,7 @@ const PROPERTIES = [
         coordinates: { lat: 31.8040, lng: 34.6552 },
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer'],
-        images: IMAGE_SETS[5],
+        images: imgs(21),
     },
     {
         title: 'בית כפרי בין היקבים במודיעין',
@@ -229,7 +279,7 @@ const PROPERTIES = [
         coordinates: { lat: 31.8992, lng: 35.0095 },
         maxGuests: 6, bedrooms: 3, beds: 4, bathrooms: 2,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking', 'petFriendly'],
-        images: IMAGE_SETS[6],
+        images: imgs(22),
     },
     {
         title: 'חדר מרוהט בדירה שיתופית ברחוב גורדון',
@@ -238,7 +288,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0800, lng: 34.7711 },
         maxGuests: 2, bedrooms: 1, beds: 1, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer'],
-        images: IMAGE_SETS[7],
+        images: imgs(23),
     },
     {
         title: 'דירת נופש מרוהטת בהולון',
@@ -247,7 +297,7 @@ const PROPERTIES = [
         coordinates: { lat: 32.0147, lng: 34.7750 },
         maxGuests: 4, bedrooms: 2, beds: 2, bathrooms: 1,
         amenities: ['wifi', 'airConditioning', 'kitchen', 'washer', 'parking'],
-        images: IMAGE_SETS[0],
+        images: imgs(24),
     },
 ];
 
@@ -290,7 +340,7 @@ async function main() {
     console.log(`✔ Inserted ${result.insertedCount} properties`);
 
     console.log('\n=== Done! ===');
-    console.log('Properties are now in Hebrew with real Israeli addresses and apartment images.');
+    console.log('Each property now has 3 unique images — no duplicate cover photos.');
     await client.close();
 }
 
