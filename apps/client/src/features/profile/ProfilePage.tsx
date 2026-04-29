@@ -5,7 +5,9 @@ import { EmptyState } from '@/components/ui/EmptyState/EmptyState';
 import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { TextField } from '@/components/ui/TextField/TextField';
 import { useAuth } from '@/context/AuthContext';
+import { useProperty } from '@/context/PropertyContext';
 import { PropertyCard } from '@/features/properties/components/PropertyCard/PropertyCard';
+import { EditPropertyDialog } from '@/features/properties/components/EditPropertyDialog/EditPropertyDialog';
 import { getMyProperties, getMyComments, deleteProperty, type Property, type MyComment } from '@/features/properties/property.service';
 import api from '@/services/api';
 import { getUserDisplayName, getUserInitial } from '@/utils/user';
@@ -19,6 +21,7 @@ type Tab = 'profile' | 'properties' | 'reviews';
 
 export const ProfilePage: React.FC = () => {
     const { user, login, token } = useAuth();
+    const { openHostDialog } = useProperty();
     const navigate = useNavigate();
 
     // Active tab
@@ -37,6 +40,7 @@ export const ProfilePage: React.FC = () => {
     // Listings state
     const [properties, setProperties] = useState<Property[]>([]);
     const [isLoadingListings, setIsLoadingListings] = useState(true);
+    const [editingProperty, setEditingProperty] = useState<Property | null>(null);
 
     // Reviews state
     const [userReviews, setUserReviews] = useState<MyComment[]>([]);
@@ -297,6 +301,7 @@ export const ProfilePage: React.FC = () => {
                                             await deleteProperty(id);
                                             setProperties((prev) => prev.filter((p) => p._id !== id));
                                         }}
+                                        onEdit={(p) => setEditingProperty(p)}
                                     />
                                 ))}
                             </div>
@@ -306,7 +311,7 @@ export const ProfilePage: React.FC = () => {
                                 title="עדיין אין נכסים"
                                 description={<>שתפו את המקום שלכם עם מטיילים מרחבי העולם.<br />הנכסים שלכם יופיעו כאן.</>}
                                 actionLabel="פרסמו את הנכס הראשון"
-                                onAction={() => navigate('/')}
+                                onAction={openHostDialog}
                             />
                         )}
                     </div>
@@ -355,6 +360,18 @@ export const ProfilePage: React.FC = () => {
                     </div>
                 )}
             </main>
+
+            {editingProperty && (
+                <EditPropertyDialog
+                    open={!!editingProperty}
+                    onOpenChange={(open) => { if (!open) setEditingProperty(null); }}
+                    property={editingProperty}
+                    onSuccess={(updated) => {
+                        setProperties((prev) => prev.map((p) => p._id === updated._id ? updated : p));
+                        setEditingProperty(null);
+                    }}
+                />
+            )}
         </div>
     );
 };

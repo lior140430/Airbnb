@@ -1,7 +1,7 @@
 ﻿import { useAuth } from '@/context/AuthContext';
 import { formatPrice } from '@/utils/format';
 import { getImageUrl, handleImageError } from '@/utils/image';
-import { Heart, MessageCircle, Star, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Pencil, Star, Trash2 } from 'lucide-react';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toggleLike, type Property } from '../../property.service';
@@ -10,9 +10,10 @@ import './PropertyCard.css';
 interface PropertyCardProps {
     property: Property;
     onDelete?: (id: string) => void;
+    onEdit?: (property: Property) => void;
 }
 
-export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onDelete }) => {
+export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onDelete, onEdit }) => {
     const [isLiked, setIsLiked] = useState(property.isLiked || false);
     const [likesCount, setLikesCount] = useState(property.likesCount || 0);
     const [deleting, setDeleting] = useState(false);
@@ -123,6 +124,33 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, onDelete }
                         }}
                     >
                         <Trash2 size={16} color="#fff" style={{ pointerEvents: 'none' }} />
+                    </button>
+                )}
+
+                {onEdit && (
+                    <button
+                        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(property); }}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onTouchStart={(e) => e.stopPropagation()}
+                        title="ערוך נכס"
+                        style={{
+                            position: 'absolute',
+                            top: onDelete ? '52px' : '12px',
+                            left: '12px',
+                            background: 'rgba(0,0,0,0.45)',
+                            border: 'none',
+                            borderRadius: '50%',
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            zIndex: 10,
+                            transition: 'background 0.2s',
+                        }}
+                    >
+                        <Pencil size={14} color="#fff" style={{ pointerEvents: 'none' }} />
                     </button>
                 )}
             </div>
