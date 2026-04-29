@@ -15,18 +15,29 @@ export interface ParsedSearchFilters {
 const SYSTEM_PROMPT = `You are a real estate search assistant. The user will provide a natural language search query (may be in Hebrew or English) about rental properties.
 
 Extract structured search filters from the query and return a JSON object with these fields (only include fields that are clearly mentioned):
-- location: city name in English (e.g. "Tel Aviv", "Jerusalem", "Haifa", "Eilat", "Netanya")  
+- location: city name in Hebrew (e.g. "תל אביב", "ירושלים", "חיפה", "אילת", "נתניה", "באר שבע", "חיפה")
 - guests: number of guests (integer)
 - minPrice: minimum price per night in ILS (integer)
 - maxPrice: maximum price per night in ILS (integer)
 - bedrooms: number of bedrooms (integer)
 - amenities: array of amenity keys from: ["wifi", "kitchen", "washer", "airConditioning", "tv", "parking", "pool", "petFriendly", "gym", "balcony"]
-- keywords: remaining search terms to match against title/description (string, keep relevant words, translate to English if needed)
+- keywords: remaining search terms to match against title/description (string, keep relevant words in Hebrew or English)
 
-Hebrew city name mappings: תל אביב→Tel Aviv, ירושלים→Jerusalem, חיפה→Haifa, אילת→Eilat, נתניה→Netanya, ראשון לציון→Rishon LeZion, אשדוד→Ashdod
+City name mappings (always use the Hebrew form):
+  Tel Aviv / תל אביב → "תל אביב"
+  Jerusalem / ירושלים → "ירושלים"
+  Haifa / חיפה → "חיפה"
+  Eilat / אילת → "אילת"
+  Netanya / נתניה → "נתניה"
+  Beer Sheva / באר שבע → "באר שבע"
+  Rishon LeZion / ראשון לציון → "ראשון לציון"
+  Ashdod / אשדוד → "אשדוד"
+  Safed / Tzfat / צפת → "צפת"
+  Tiberias / טבריה → "טבריה"
+  Nazareth / נצרת → "נצרת"
 
 Return ONLY valid JSON, no markdown, no explanation.
-Example output: {"location":"Tel Aviv","guests":3,"amenities":["pool","wifi"],"keywords":"quiet apartment"}`;
+Example output: {"location":"תל אביב","guests":3,"amenities":["pool","wifi"],"keywords":"דירה שקטה"}`;
 
 @Injectable()
 export class AiSearchService {

@@ -138,6 +138,46 @@ export class PropertyService implements OnModuleInit {
         return property.save();
     }
 
+    /**
+     * Normalise a location string coming from Nominatim or the AI:
+     *  - Handles English city names  (AI returns "Tel Aviv")
+     *  - Handles Hebrew Nominatim variants  ("תל אביב-יפו" → "תל אביב")
+     * Returns the canonical Hebrew name used in the DB, or the original if unknown.
+     */
+    private normalizeLocation(location: string): string {
+        const CITY_MAP: Record<string, string> = {
+            // English → Hebrew
+            'tel aviv': 'תל אביב', 'tel-aviv': 'תל אביב',
+            'tel aviv-yafo': 'תל אביב', 'tel aviv yafo': 'תל אביב', 'tel aviv jaffa': 'תל אביב',
+            'jerusalem': 'ירושלים', 'yerushalayim': 'ירושלים',
+            'haifa': 'חיפה',
+            'eilat': 'אילת',
+            'netanya': 'נתניה',
+            'rishon lezion': 'ראשון לציון', 'rishon le-zion': 'ראשון לציון', 'rishon leẕiyyon': 'ראשון לציון',
+            'ashdod': 'אשדוד',
+            'beer sheva': 'באר שבע', 'beer-sheva': 'באר שבע', "be'er sheva": 'באר שבע',
+            'rosh pinna': 'ראש פינה', 'rosh ha-niqra': 'ראש הנקרה',
+            'mitzpe ramon': 'מצפה רמון', 'mizpe ramon': 'מצפה רמון',
+            'safed': 'צפת', 'tzfat': 'צפת', 'zefat': 'צפת',
+            'nazareth': 'נצרת',
+            'tiberias': 'טבריה',
+            'akko': 'עכו', 'acre': 'עכו',
+            'bat yam': 'בת ים',
+            'petah tikva': 'פתח תקווה', 'petach tikva': 'פתח תקווה',
+            'bnei brak': 'בני ברק',
+            'holon': 'חולון',
+            'ramat gan': 'רמת גן',
+            'givatayim': 'גבעתיים',
+            // Hebrew Nominatim variants → canonical DB value
+            'תל אביב-יפו': 'תל אביב', 'תל אביב יפו': 'תל אביב',
+            'ירושלים': 'ירושלים', 'ירושלים (יְרוּשָׁלַיִם)': 'ירושלים',
+            'באר שבע': 'באר שבע', 'בְּאֵר שֶׁבַע': 'באר שבע',
+        };
+
+        const key = location.trim().toLowerCase();
+        return CITY_MAP[key] ?? location;
+    }
+
     async findAll(page: number = 1, limit: number = 10, ownerId?: string, currentUserId?: string, search?: {
         q?: string;
         location?: string;
@@ -157,9 +197,30 @@ export class PropertyService implements OnModuleInit {
             pipeline.push({ $match: { ownerId } });
         }
 
-        // Search filters
+        // Location search — normalise the input then try text match;
+        // if geocoding returns coords, also accept properties within ~40 km radius.
         if (search?.location) {
-            pipeline.push({ $match: { 'location.city': { $regex: search.location, $options: 'i' } } });
+            const normalized = this.normalizeLocation(search.location);
+
+            // Try to geocode so we can do a geographic bounding-box match in parallel
+            const coords = await this.geocodingService.geocode(normalized).catch(() => null);
+
+            if (coords) {
+                const delta = 0.36; // ≈ 40 km in degrees lat/lng
+                pipeline.push({
+                    $match: {
+                        $or: [
+                            { 'location.city': { $regex: normalized, $options: 'i' } },
+                            {
+                                'coordinates.lat': { $gte: coords.lat - delta, $lte: coords.lat + delta },
+                                'coordinates.lng': { $gte: coords.lng - delta, $lte: coords.lng + delta },
+                            },
+                        ],
+                    },
+                });
+            } else {
+                pipeline.push({ $match: { 'location.city': { $regex: normalized, $options: 'i' } } });
+            }
         }
 
         if (search?.guests) {
