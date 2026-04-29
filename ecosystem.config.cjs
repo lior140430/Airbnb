@@ -18,7 +18,12 @@ module.exports = {
             name: 'client-static',
             cwd: path.join(__dirname, 'apps/client'),
             script: 'serve.mjs',
-            env_production: { NODE_ENV: 'production' },
+            env_production: {
+                NODE_ENV: 'production',
+                PORT: '443',
+                SSL_KEY_PATH: '/home/node35/certs/server-key.pem',
+                SSL_CERT_PATH: '/home/node35/certs/server-cert.pem',
+            },
         },
     ],
 };
