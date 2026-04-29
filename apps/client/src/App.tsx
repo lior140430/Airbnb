@@ -49,11 +49,10 @@ function OAuthCallback() {
 
 function RootHandler() {
     const { login, isAuthenticated, loading, isAuthDialogOpen, openAuthDialog, closeAuthDialog } = useAuth();
-    const { triggerRefresh } = useProperty();
+    const { triggerRefresh, isHostDialogOpen, openHostDialog, closeHostDialog } = useProperty();
     const navigate = useNavigate();
     const [isCheckingParams, setIsCheckingParams] = useState(true);
     const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
-    const [isHostDialogOpen, setIsHostDialogOpen] = useState(false);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -96,13 +95,13 @@ function RootHandler() {
         if (!isAuthenticated) {
             openAuthDialog();
         } else {
-            setIsHostDialogOpen(true);
+            openHostDialog();
         }
     };
 
     const handlePropertyCreated = () => {
         triggerRefresh();
-        setIsHostDialogOpen(false);
+        closeHostDialog();
     };
 
     if (loading || isCheckingParams) return <div>טוען...</div>;
@@ -127,7 +126,7 @@ function RootHandler() {
 
             <CreatePropertyDialog
                 open={isHostDialogOpen}
-                onOpenChange={setIsHostDialogOpen}
+                onOpenChange={(open) => open ? openHostDialog() : closeHostDialog()}
                 onSuccess={handlePropertyCreated}
             />
 

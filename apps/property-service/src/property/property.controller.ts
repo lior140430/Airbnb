@@ -146,8 +146,15 @@ export class PropertyController {
     @UseGuards(AuthGuard('jwt'))
     @ApiOperation({ summary: 'Update a property' })
     @ApiResponse({ status: 200, description: 'The property has been successfully updated.' })
-    update(@Param('id') id: string, @Body() updatePropertyDto: UpdatePropertyDto, @Req() req) {
-        return this.propertyService.update(id, updatePropertyDto, req.user._id);
+    @UseInterceptors(FilesInterceptor('images', 5, multerOptions))
+    update(
+        @Param('id') id: string,
+        @Body() updatePropertyDto: UpdatePropertyDto,
+        @UploadedFiles() files: Array<Express.Multer.File>,
+        @Req() req,
+    ) {
+        const newImages = files ? files.map((f) => f.path.replace(/\\/g, '/')) : [];
+        return this.propertyService.update(id, updatePropertyDto, req.user._id, newImages);
     }
 
     @Delete(':id')
@@ -188,5 +195,13 @@ export class PropertyController {
     @ApiResponse({ status: 200, description: 'Return comments.' })
     getComments(@Param('id') id: string) {
         return this.propertyService.getComments(id);
+    }
+
+    @Delete('comments/:commentId')
+    @UseGuards(AuthGuard('jwt'))
+    @ApiOperation({ summary: 'Delete a comment written by the current user' })
+    @ApiResponse({ status: 200, description: 'Comment deleted.' })
+    deleteComment(@Param('commentId') commentId: string, @Req() req) {
+        return this.propertyService.deleteComment(commentId, req.user._id);
     }
 }
