@@ -35,7 +35,7 @@ const avatarMulterOptions = {
             cb(new Error('Only jpeg, png, and webp images are allowed'), false);
         }
     },
-    limits: { fileSize: 5 * 1024 * 1024 },
+    limits: { fileSize: 25 * 1024 * 1024 },
 };
 
 @ApiTags('auth')

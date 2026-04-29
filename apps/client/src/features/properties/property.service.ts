@@ -137,3 +137,7 @@ export const getMyComments = async (): Promise<MyComment[]> => {
     const response = await propertyApi.get('/properties/comments/mine');
     return response.data;
 };
+
+export const deleteProperty = async (id: string): Promise<void> => {
+    await propertyApi.delete(`/properties/${id}`);
+};

@@ -6,7 +6,7 @@ import { Spinner } from '@/components/ui/Spinner/Spinner';
 import { TextField } from '@/components/ui/TextField/TextField';
 import { useAuth } from '@/context/AuthContext';
 import { PropertyCard } from '@/features/properties/components/PropertyCard/PropertyCard';
-import { getMyProperties, getMyComments, type Property, type MyComment } from '@/features/properties/property.service';
+import { getMyProperties, getMyComments, deleteProperty, type Property, type MyComment } from '@/features/properties/property.service';
 import api from '@/services/api';
 import { getUserDisplayName, getUserInitial } from '@/utils/user';
 import { Building2, CheckCircle, Home, MessageSquareText, Pencil, Save, Star, User, X } from 'lucide-react';
@@ -290,7 +290,14 @@ export const ProfilePage: React.FC = () => {
                         ) : properties.length > 0 ? (
                             <div className="pp-properties-grid">
                                 {properties.map((prop) => (
-                                    <PropertyCard key={prop._id} property={prop} />
+                                    <PropertyCard
+                                        key={prop._id}
+                                        property={prop}
+                                        onDelete={async (id) => {
+                                            await deleteProperty(id);
+                                            setProperties((prev) => prev.filter((p) => p._id !== id));
+                                        }}
+                                    />
                                 ))}
                             </div>
                         ) : (
