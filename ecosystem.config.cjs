@@ -20,9 +20,7 @@ module.exports = {
             script: 'serve.mjs',
             env_production: {
                 NODE_ENV: 'production',
-                PORT: '443',
-                SSL_KEY_PATH: '/home/node35/certs/server-key.pem',
-                SSL_CERT_PATH: '/home/node35/certs/server-cert.pem',
+                PORT: '3000',
             },
         },
     ],
