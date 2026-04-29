@@ -261,32 +261,17 @@ export class PropertyService implements OnModuleInit {
             pipeline.push({ $match: { 'location.city': { $in: finalCities } } });
 
         } else if (search?.location) {
-            // Single location — three strategies in priority order:
-            //  1. Semantic group (e.g. "ליד הים" → coastal cities list)
-            //  2. Exact/normalised city name + geographic bounding-box fallback
+            // Single location:
+            //  1. Semantic group (e.g. "ליד הים") → $in list of relevant cities
+            //  2. Specific city name → exact regex match only (no bounding box —
+            //     bounding-box was too broad and returned neighbouring cities)
             const raw = search.location.trim();
             const groupCities = this.LOCATION_GROUPS[raw] ?? this.LOCATION_GROUPS[raw.toLowerCase()];
             if (groupCities && groupCities.length > 0) {
                 pipeline.push({ $match: { 'location.city': { $in: groupCities } } });
             } else {
                 const normalized = this.normalizeLocation(raw);
-                const coords = await this.geocodingService.geocode(normalized).catch(() => null);
-                if (coords) {
-                    const delta = 0.36; // ≈ 40 km in degrees lat/lng
-                    pipeline.push({
-                        $match: {
-                            $or: [
-                                { 'location.city': { $regex: normalized, $options: 'i' } },
-                                {
-                                    'coordinates.lat': { $gte: coords.lat - delta, $lte: coords.lat + delta },
-                                    'coordinates.lng': { $gte: coords.lng - delta, $lte: coords.lng + delta },
-                                },
-                            ],
-                        },
-                    });
-                } else {
-                    pipeline.push({ $match: { 'location.city': { $regex: normalized, $options: 'i' } } });
-                }
+                pipeline.push({ $match: { 'location.city': { $regex: normalized, $options: 'i' } } });
             }
         }
 

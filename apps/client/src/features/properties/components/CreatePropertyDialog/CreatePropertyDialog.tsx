@@ -139,7 +139,21 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
         setAmenities((prev) => prev.includes(key) ? prev.filter((a) => a !== key) : [...prev, key]);
     };
 
-    const validateStep1 = () => {
+    // Geocode a free-text query with Nominatim; returns first match or null
+    const geocodeFallback = async (query: string): Promise<NominatimResult | null> => {
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=1&countrycodes=il`,
+                { headers: { 'Accept-Language': 'he' } },
+            );
+            const data: NominatimResult[] = await res.json();
+            return data[0] ?? null;
+        } catch {
+            return null;
+        }
+    };
+
+    const validateStep1 = async (): Promise<boolean> => {
         if (!formData.title || !formData.description || !formData.price) {
             setError('נא למלא את כל השדות החובה');
             return false;
@@ -149,7 +163,22 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
             return false;
         }
         if (!coordinates) {
-            setError('יש לבחור כתובת מהרשימה כדי לאמת את המיקום');
+            if (!addressQuery.trim()) {
+                setError('יש להזין כתובת');
+                return false;
+            }
+            // Address was typed but not selected from suggestions (e.g. street not found in
+            // Nominatim). Try to geocode the query as-is, then fall back to city name only.
+            setError('מאמת כתובת...');
+            let result = await geocodeFallback(addressQuery);
+            if (!result && formData.city) {
+                result = await geocodeFallback(formData.city);
+            }
+            if (result) {
+                handleAddressSelect(result);
+                return true;
+            }
+            setError('לא ניתן לאמת את הכתובת — נסה שם עיר בלבד (למשל: "תל אביב")');
             return false;
         }
         return true;
@@ -158,7 +187,7 @@ export const CreatePropertyDialog: React.FC<CreatePropertyDialogProps> = ({ open
     const handleNext = () => {
         setError(null);
         if (step === 'details') {
-            if (validateStep1()) setStep('specs');
+            validateStep1().then((ok) => { if (ok) setStep('specs'); });
         } else if (step === 'specs') {
             setStep('photos');
         } else {
